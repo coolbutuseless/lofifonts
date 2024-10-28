@@ -1,0 +1,96 @@
+---
+title: "Using vector fonts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using vector fonts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lofifonts)
+```
+
+
+
+
+
+### Vector Fonts: included fonts
+
+```{r}
+names(font_info$vector)
+```
+
+| Type   | Name            | Sizes                         | Unicode?              | # glyphs |
+|--------|-----------------|-------------------------------|-----------------------|----------|
+| Vector | gridfont        |                               | Lower case ASCII only |          |
+| Vector | gridfont_smooth |                               | Lower case ASCII only |          |
+| Vector | arcade          |                               | Upper case ASCII only |          |
+
+
+## Vector font: functions
+
+* `vector_text_coords()` returns a data.frame of strokes
+* `vector_text_matrix()` returns a binary matrix with pixel locations set to 1
+* `vector_text_raster()` returns a raster image of the text
+
+
+
+## Vector font: Rendering text
+
+Text may be rendered with a vector font to 
+
+1. A data.frame of stroke endpoints
+2. A binary matrix of pixel locations
+3. A simple `raster` object 
+
+```{r vector-coords, fig.height = 3}
+library(lofifonts)
+vector_text_coords("Hello", font = 'gridfont_smooth') |> 
+  head()
+```
+
+
+```{r vector-matrix, fig.height = 3}
+vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
+```
+
+
+```{r vector-raster, fig.height = 3}
+vector_text_raster("Hello", "gridfont_smooth") |>
+  plot(interpolate = FALSE)
+```
+
+## Vector font: Bespoke pixel rendering
+
+This is an example of bespoke rendering of the strokes for an example string.
+
+For each character (`char_idx`) there are 1-or-more strokes (`stroke`).  Each stroke
+has at least 2 points (indicated by `idx`).
+
+When plotting with ggplot, draw path for the points-within-strokes-within-characters.
+
+
+```{r vector-bespoke, fig.height = 3}
+library(ggplot2)
+
+coords <- vector_text_coords("Hello", "gridfont_smooth")
+head(coords)
+
+ggplot(coords) +
+  geom_path(aes(x, y, 
+                group = interaction(char_idx, stroke_idx), 
+                colour = as.factor(char_idx)), 
+            linewidth = 4) +
+  geom_point(aes(x, y), color = 'yellow') + 
+  theme_bw() + 
+  theme(legend.position = 'none')
+```
+

@@ -1,0 +1,47 @@
+---
+title: "Fontsheets for bitmap fonts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fontsheets for bitmap fonts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ggplot2)
+library(lofifonts)
+```
+
+
+A selection of the glyphs from each of the bitmap fonts
+
+```{r fontsheets, fig.height = 3, fig.width = 4}
+lo <- utf8ToInt('a')
+hi <- utf8ToInt('z')
+txt <- intToUtf8(seq(lo, hi))
+
+for (font_name in names(font_info$bitmap)) {
+  coords <- bitmap_text_coords(txt, font_name)
+  
+  p <- ggplot(coords) +
+    geom_tile(aes(x0, y0), width=1, height = 1, na.rm = TRUE) +
+    facet_wrap(~char_idx, ncol = 9)+
+    theme_minimal(15) +
+    coord_equal() + 
+    labs(title = font_name) +
+    theme(
+      strip.text = element_blank(),
+      axis.text  = element_blank(),
+      axis.title = element_blank()
+    )
+  
+  print(p)
+}
+```

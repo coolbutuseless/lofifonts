@@ -1,0 +1,321 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+
+library(lofifonts)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+pkgdown::build_site(override = list(destination = "../coolbutuseless.github.io/package/lofifonts"))
+```
+
+# lofifonts
+
+
+<!-- badges: start -->
+![](https://img.shields.io/badge/cool-useless-green.svg)
+[![R-CMD-check](https://github.com/coolbutuseless/lofifonts/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/coolbutuseless/lofifonts/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/lofifonts)](https://CRAN.R-project.org/package=lofifonts)
+<!-- badges: end -->
+
+`lofifonts` provides access to raw data for the included bitmap and vector fonts.
+
+Bitmap and vector fonts allow for bespoke rendering of pixels and strokes in 
+situations where fine control over rendering is required.  For example, 
+individual pixels and strokes could be animated to create novel effects like
+exploding or coalescing text.  With access to coordinates, variations in 3D
+also become possible.
+
+This package will render text with a specified bitmap or vector font to:
+
+* a data.frame of coordinates (for bitmap fonts)
+* a data.frame of character strokes (for vector coordinates)
+* a binary matrix indicating the rendered text
+* a raster image of the rendered text
+
+
+
+### What's in the box
+
+* Bitmap font functions
+    * `bitmap_text_coords()` returns a data.frame of pixel locations
+    * `bitmap_text_matrix()` returns a binary matrix with pixel locations set to 1
+    * `bitmap_text_raster()` returns a raster image of the text
+* Vector font functions
+    * `vector_text_coords()` returns a data.frame of strokes
+    * `vector_text_matrix()` returns a binary matrix with pixel locations set to 1
+    * `vector_text_raster()` returns a raster image of the text
+
+### Fonts
+
+
+| Type   | Name            | Sizes                         | Unicode?              | # glyphs |
+|--------|-----------------|-------------------------------|-----------------------|----------|
+| Bitmap | Spleen          | 5x8, 6x12, 8x16, 12x24, 16x32 | Some                  | 450-1000 |
+| Bitmap | Tamzen          | 5x9, 6x12, 7x13, 8x15, 8x16, 10x20 bold/regular | Some |  180    |
+| Bitmap | Unifont         | 16x16                         | Yes. Plane 0, 1       | 113446   |
+| Bitmap | Unscii          | 8x8, 8x16                     | Some                  | 3240     |
+| Vector | gridfont        |                               | Lower case ASCII only | 68       |
+| Vector | gridfont_smooth |                               | Lower case ASCII only | 68       |
+| Vector | arcade          |                               | Upper case ASCII only | 66       |
+
+
+Bitmap fonts:
+
+* [Spleen v2.1.0](https://github.com/fcambus/spleen) License: BSD 2-clause. See `LICENSE-spleen.txt`
+* [Tamzen v1.11.6](https://github.com/sunaku/tamzen-font) Free to distribute
+* [Unifont v16.0.0.1](https://unifoundry.com/unifont/) License: SIL Open Font License (OFL) version 1.1. See `LICENSE-unifont.txt`
+* [Unscii v2.0](https://github.com/viznut/unscii) Font is in the public domain.
+
+Vector fonts
+
+* [gridfont](https://github.com/inconvergent/gridfont) License: MIT. See `LICENSE-gridfont.txt`
+* `arcade` is a vector font I created. License: SIL Open Font License (OFL) version 1.1. See `LICENSE-arcade.txt`
+
+
+## Installation
+
+You can install from [GitHub](https://github.com/coolbutuseless/lofifonts) with:
+
+``` r
+# install.package('remotes')
+remotes::install_github('coolbutuseless/lofifonts')
+```
+
+```{r echo=FALSE, eval=FALSE}
+txt <- "привет"
+txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution」である。"
+```
+
+
+## Included fonts
+
+```{r}
+font_names
+```
+
+
+## Bitmap font: Rendering text
+
+Text may be rendered with a bitmap font to 
+
+1. A data.frame of pixel locations
+2. A binary matrix of pixel locations
+3. A simple `raster` object 
+
+```{r bitmap-coords, fig.height = 3}
+library(lofifonts)
+bitmap_text_coords("Hello", font = 'unifont') |>
+  head()
+```
+
+
+```{r bitmap-matrix, fig.height = 3}
+bitmap_text_matrix("Hello", "unifont") 
+```
+
+
+```{r bitmap-raster, fig.height = 3}
+bitmap_text_raster("Hello", "unifont") |>
+  plot(interpolate = FALSE)
+```
+
+```{r bitmap-raster-codepoints, fig.height = 3}
+# Render codepoints directly
+bitmap_text_raster(intToUtf8(c(0x1f44d, 0x1f44e)), "unifont") |>
+  plot(interpolate = FALSE)
+```
+
+## Bitmap font: Bespoke pixel rendering
+
+This is an example of bespoke rendering of the pixel data for an example string.
+
+Each pixel in the `coords` data.frame has an `x` and `y` coordinates, and to 
+render this font, a small square will be drawn for each pixel.  
+
+A gap will be left between the rectangels to highlight the pixelated origin 
+of the text.
+
+```{r bitmap-bespoke, fig.height = 4}
+library(grid)
+coords <- bitmap_text_coords("Hello\n#RStats", "spleen-6x12")
+head(coords)
+
+grid.newpage()
+grid.rect(
+  x = coords$x * 4, 
+  y = coords$y * 4, 
+  width  = 3, 
+  height = 3, 
+  default.units = 'mm',
+  gp = gpar(fill = rainbow(nrow(coords)), col = NA)
+)
+```
+
+
+
+## Vector font: Rendering text
+
+Text may be rendered with a vector font to 
+
+1. A data.frame of stroke endpoints
+2. A binary matrix of pixel locations
+3. A simple `raster` object 
+
+```{r vector-coords, fig.height = 3}
+library(lofifonts)
+vector_text_coords("Hello", font = 'gridfont_smooth') |> 
+  head()
+```
+
+
+```{r vector-matrix, fig.height = 3}
+vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
+```
+
+
+```{r vector-raster, fig.height = 3}
+vector_text_raster("Hello", "gridfont_smooth") |>
+  plot(interpolate = FALSE)
+```
+
+
+## Vector font: Bespoke pixel rendering
+
+This is an example of bespoke rendering of the strokes for an example string.
+
+For each character (`char_idx`) there are 1-or-more strokes (`stroke`).  Each stroke
+has at least 2 points (indicated by `idx`).
+
+When plotting with ggplot, draw path for the points-within-strokes-within-characters.
+
+
+```{r vector-bespoke, fig.height = 3}
+library(ggplot2)
+
+coords <- vector_text_coords("Hello", "gridfont_smooth")
+head(coords)
+
+ggplot(coords) +
+  geom_path(aes(x, y, 
+                group = interaction(char_idx, stroke_idx), 
+                colour = as.factor(char_idx)), 
+            linewidth = 4) +
+  geom_point(aes(x, y), color = 'yellow') + 
+  theme_bw() +
+  theme(legend.position = 'bottom') + 
+  coord_equal()
+```
+
+
+
+
+## Unicode support
+
+The font with the best unicode coverage is the bitmap font `unifont`
+
+```{r unicode, fig.height = 3}
+library(lofifonts)
+
+txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution」である。"
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Render quickly with built-in conversion
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bitmap_text_raster(txt, "unifont") |>
+  plot(interpolate = FALSE)
+```
+
+
+```{r unicode2, fig.height = 2}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Bespoke plotting of the pixel locations
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coords <- bitmap_text_coords(txt, "unifont")
+
+ggplot(coords) +
+  geom_tile(aes(x, y, fill = as.factor(char_idx)), na.rm = TRUE) +
+  theme_void(10) +
+  coord_equal() + 
+  theme(legend.position = 'none')
+```
+
+
+
+## Bitmap Fonts: Font Sheets
+
+A selection of the glyphs from each of the bitmap fonts
+
+```{r fontsheets, echo=FALSE, eval=TRUE, fig.height = 4}
+lo <- utf8ToInt('a')
+hi <- utf8ToInt('z')
+txt <- intToUtf8(seq(lo, hi))
+
+for (font_name in names(font_info$bitmap)) {
+  coords <- bitmap_text_coords(txt, font_name)
+  
+  p <- ggplot(coords) +
+    geom_tile(aes(x0, y0), width=1, height = 1, na.rm = TRUE) +
+    facet_wrap(~char_idx, ncol = 9)+
+    theme_minimal(15) +
+    coord_equal() + 
+    labs(title = font_name) +
+    theme(
+      strip.text = element_blank(),
+      axis.text  = element_blank(),
+      axis.title = element_blank()
+    )
+  
+  print(p)
+}
+```
+
+## Vector fonts: Font Sheets
+
+A selection of the glyphs from each of the vector fonts
+
+```{r vectorsheets, echo=FALSE, eval=TRUE, fig.height = 4}
+lo <- utf8ToInt('a')
+hi <- utf8ToInt('z')
+txt <- intToUtf8(seq(lo, hi))
+
+for (font_name in names(font_info$vector)) {
+  coords <- vector_text_coords(txt, font_name)
+  
+  p <- ggplot(coords) +
+    geom_path(aes(x0, y0, group = stroke_idx)) +
+    facet_wrap(~char_idx, ncol = 9)+
+    theme_minimal(15) +
+    coord_equal() + 
+    labs(title = font_name) +
+    theme(
+      strip.text = element_blank(),
+      axis.text  = element_blank(),
+      axis.title = element_blank()
+    )
+  
+  print(p)
+}
+```
+
+
+
+
+
+
+
+
+
+
+

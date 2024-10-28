@@ -1,0 +1,90 @@
+---
+title: "Using bitmap fonts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using bitmap fonts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lofifonts)
+```
+
+
+## Bitmap font: included fonts
+
+```{r}
+names(font_info$bitmap)
+```
+
+| Type   | Name            | Sizes                         | Unicode?              | # glyphs |
+|--------|-----------------|-------------------------------|-----------------------|----------|
+| Bitmap | Spleen          | 5x8, 6x12, 8x16, 12x24, 16x32 | Some                  | 450-1000 |
+| Bitmap | Unifont         | 16x16                         | Yes. Plane 0, 1       | 113446   |
+| Bitmap | Unscii          | 8x8, 8x16                     | Some                   | 3240    |
+
+## Bitmap font functions
+
+* `bitmap_text_coords()` returns a data.frame of pixel locations
+* `bitmap_text_matrix()` returns a binary matrix with pixel locations set to 1
+* `bitmap_text_raster()` returns a raster image of the text
+
+
+## Bitmap font: Rendering text
+
+Text may be rendered with a bitmap font to 
+
+1. A data.frame of pixel locations
+2. A binary matrix of pixel locations
+3. A simple `raster` object 
+
+```{r bitmap-coords, fig.height = 3}
+library(lofifonts)
+bitmap_text_coords("Hello", font = 'unifont') |>
+  head()
+```
+
+
+```{r bitmap-matrix, fig.height = 3}
+bitmap_text_matrix("Hello", "unifont") 
+```
+
+
+```{r bitmap-raster, fig.height = 3}
+bitmap_text_raster("Hello", "unifont") |>
+  plot(interpolate = FALSE)
+```
+
+## Bitmap font: Bespoke pixel rendering
+
+This is an example of bespoke rendering of the pixel data for an example string.
+
+Each pixel in the `coords` data.frame has an `x` and `y` coordinates, and to 
+render this font, a small square will be drawn for each pixel.  
+
+A gap will be left between the rectangels to highlight the pixelated origin 
+of the text.
+
+```{r bitmap-bespoke, fig.height = 4, fig.width = 8}
+library(grid)
+coords <- bitmap_text_coords("Hello\n#RStats", "spleen-6x12")
+head(coords)
+
+grid.newpage()
+grid.rect(
+  x = coords$x * 4, 
+  y = coords$y * 4, 
+  width  = 3, 
+  height = 3, 
+  default.units = 'mm',
+  gp = gpar(fill = rainbow(nrow(coords)), col = NA)
+)
+```

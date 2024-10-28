@@ -1,0 +1,86 @@
+---
+title: "Unicode Support"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Unicode Support}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lofifonts)
+```
+
+
+
+## Unicode support
+
+Each font supports a different number of glyphs.  The vector fonts include
+just the ASCII character sets.
+
+The font with the best unicode coverage is the bitmap font `unifont` which supports
+over 50 thousand glyphs.
+
+
+## Font overview
+
+| Type   | Name           | Unicode?              | # glyphs |
+|--------|----------------|-----------------------|----------|
+| Bitmap | Spleen         | Some                  | 450-1000 |
+| Bitmap | Unifont        | Lots!                 | 57086    |
+| Bitmap | Unscii         | Some                  | 3240     |
+| Vector | gridfont       | Lower case ASCII only | 68       |
+| Vector | gridfont_smooth| Lower case ASCII only | 68       |
+| Vector | arcade         | Upper case ASCII only | 66       |
+
+
+## Rendering with `unifont`
+
+```{r unicode, fig.height = 3, fig.width = 8}
+txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution」である。"
+
+bitmap_text_raster(txt, "unifont") |>
+  plot(interpolate = FALSE)
+```
+
+
+## Default character
+
+When a particular unicode glyph is not available, some fonts define
+a default character which should be used instead.
+
+If a default character is not defined for a font then unknown characters
+will use `?`
+
+
+## Lists of supported codepoints
+
+The unicode glyphs supported by each font are listed in the `font_info` data
+structure.
+
+```{r}
+# Cozette font - number of codepoints and a list of the first 200
+font_info$bitmap$`spleen-12x24`$codepoints |> 
+  length()
+
+font_info$bitmap$`spleen-12x24`$codepoints |> 
+  head(60)
+
+font_info$bitmap$`spleen-12x24`$codepoints |> 
+  head(60) |>
+  intToUtf8()
+
+# Arcade font - includes 66 codepoints
+font_info$vector$arcade$codepoints
+intToUtf8(font_info$vector$arcade$codepoints)
+```
+
+
+
