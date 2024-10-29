@@ -25,6 +25,8 @@ vector_text_coords(
 
 \item{missing}{Codepoint to use if glyph not available in font. default: Codepoint
 for '?'}
+
+\item{line_height}{line height}
 }
 \value{
 data.frame of stroke information

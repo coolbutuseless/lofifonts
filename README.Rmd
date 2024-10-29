@@ -186,7 +186,7 @@ vector_text_matrix("Hello", "gridfont_smooth", scale = 1)
 
 
 ```{r vector-raster, fig.height = 3}
-vector_text_raster("Hello", "gridfont_smooth") |>
+vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
   plot(interpolate = FALSE)
 ```
 
@@ -322,7 +322,15 @@ txt <- paste(txt, collapse = "\n") -> txt
 vector_text_coords(txt) |> bench::mark()
 
 vector_text_matrix(txt, scale = 1) 
-vector_text_raster(txt, scale = 5) |> plot(interpolate = FALSE)
+vector_text_raster(txt, scale = 3) |> plot(interpolate = FALSE)
+
+
+set.seed(1); 
+lorem::ipsum(2) |> 
+  strwrap(40) |> 
+  paste(collapse = "\n") |>
+  vector_text_raster(scale = 3) |> 
+  plot()
 ```
 
 

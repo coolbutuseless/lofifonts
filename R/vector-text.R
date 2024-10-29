@@ -16,6 +16,7 @@ globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
 #' @param dy Additional character spacing in the vertical direction. Default: 0
 #' @param missing Codepoint to use if glyph not available in font. default: Codepoint
 #'        for '?'
+#' @param line_height line height
 #'
 #' @return data.frame of stroke information
 #' \describe{
@@ -46,6 +47,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
     return(data.frame())
   }
   
+  font <- match.arg(font)
   # arcade is only lower case. gridfont is only uppercase
   if (font == 'arcade') {
     text <- toupper(text)
@@ -77,7 +79,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   idxs[is.na(idxs)] <- missing
   
-  widths   <- vector$width  [idxs]
+  widths   <- vector$widths [idxs]
   lens     <- vector$npoints[idxs]
   row_idxs <- vector$rows   [idxs]
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
@@ -91,11 +93,13 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
     if (linestart[i] == linebreak[i]) {
       xoffset <- c(xoffset, 0L)
     } else {
-      this_offset <- cumsum(widths[seq(linestart[i] + 1, linebreak[i])])
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
       xoffset <- c(xoffset, 0L, this_offset)
     }
   }
+  widths
   xoffset
+  # xoffset <- c(0L, cumsum(widths)[-length(widths)])
   res$xoffset <- rep.int(xoffset, lens)
   
   
@@ -104,13 +108,14 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   res$x0        <- res$x
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
+  res$width     <- rep.int(widths, lens)
   
   line_height <- line_height %||% vector$font_info$line_height
   res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset
   
-  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0')]
+  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0', 'width', 'xoffset')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
   res
 }
