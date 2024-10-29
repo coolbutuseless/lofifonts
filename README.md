@@ -204,13 +204,13 @@ coords <- bitmap_text_coords("Hello\n#RStats", "spleen-6x12")
 head(coords)
 ```
 
-    #>     char_idx codepoint x y line x0 y0
-    #> 516        1        72 5 8    1  5  8
-    #> 517        1        72 1 8    1  1  8
-    #> 518        1        72 5 7    1  5  7
-    #> 519        1        72 1 7    1  1  7
-    #> 520        1        72 5 6    1  5  6
-    #> 521        1        72 1 6    1  1  6
+    #>     char_idx codepoint x  y line x0 y0
+    #> 516        1        72 5 20    1  5  8
+    #> 517        1        72 1 20    1  1  8
+    #> 518        1        72 5 19    1  5  7
+    #> 519        1        72 1 19    1  1  7
+    #> 520        1        72 5 18    1  5  6
+    #> 521        1        72 1 18    1  1  6
 
 ``` r
 grid.newpage()

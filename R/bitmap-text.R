@@ -42,7 +42,13 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   }
   
   codepoints <- utf8ToInt(text)
-
+  
+  # Remove carriage returns and calculate lines
+  is_cr      <- codepoints == 10
+  line       <- cumsum(is_cr)[!is_cr]
+  codepoints <- codepoints[!is_cr]
+  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  
   idxs <- bitmap$codepoint_to_idx[codepoints + 1L]
   
   # Determine what char should be used for missing
@@ -53,25 +59,39 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   
   idxs[is.na(idxs)] <- missing
   
-  # message("TODO: handle \\n characters")
-  # message("TODO: add line")
-  # message("TODO: y offset")
-  
   starts <- bitmap$row_start[idxs]
   ends   <- bitmap$row_end  [idxs]
   widths <- bitmap$width    [idxs]
+  lens   <- bitmap$npoints  [idxs]
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
-  lens     <- lengths(row_idxs)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
   res <- bitmap$coords[row_idxs, ]
-  xoffset       <- cumsum(c(0, widths[-length(widths)])) 
-  res$xoffset   <- rep.int(xoffset, lens)
+  
+  # xoffset needs to reset to 0 after every linebreak
+  xoffset <- integer(0)
+  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
+  for (i in seq_along(linestart)) {
+    if (linestart[i] == linebreak[i]) {
+      xoffset <- c(xoffset, 0L)
+    } else {
+      this_offset <- cumsum(widths[seq(linestart[i] + 1, linebreak[i])])
+      xoffset <- c(xoffset, 0L, this_offset)
+    }
+  }
+  xoffset
+  res$xoffset <- rep.int(xoffset, lens)
+  
+  
   res$char_idx  <- rep.int(seq_along(idxs), lens)
   res$codepoint <- rep.int(codepoints, lens)
   res$x0        <- res$x
   res$y0        <- res$y
+  res$line      <- rep.int(line, lens)
+  
+  line_height <- line_height %||% bitmap$font_info$line_height
+  res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset
   res$line <- 1L
