@@ -313,6 +313,22 @@ for (font_name in names(font_info$vector)) {
 ```{r echo=FALSE, eval=FALSE}
 set.seed(1); lorem::ipsum(2) |> strwrap(40) |> paste(collapse = "\n") -> txt
 bitmap_text_raster(txt) |> bench::mark()
+
+set.seed(1); 
+txt <- lorem::ipsum(2) |> strwrap(40) 
+txt <- paste(txt, collapse = "\n") -> txt
+
+# txt <- 'hello\nworld\nthere\ngoes\nthe'
+vector_text_coords(txt) -> zz
+zz
+library(ggplot2)
+ggplot(zz) + 
+  geom_path(aes(x, y, group = interaction(char_idx, stroke_idx, drop = TRUE))) + 
+  coord_equal()
+
+
+vector_text_matrix(txt, scale = 1) 
+vector_text_raster(txt, scale = 5) |> plot(interpolate = FALSE)
 ```
 
 

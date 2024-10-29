@@ -249,6 +249,7 @@ vector_text_matrix <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   df <- vector_text_coords(text = text, font = font, dx = dx, dy = dy, missing = missing)
   
+  df <- df[!is.na(df$x) & !is.na(df$y), ]
   df$x <- df$x * scale + 1L
   df$y <- df$y * scale + 1L
   
