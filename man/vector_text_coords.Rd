@@ -9,7 +9,8 @@ vector_text_coords(
   font = c("gridfont", "gridfont_smooth", "arcade"),
   dx = 0,
   dy = 0,
-  missing = utf8ToInt("?")
+  missing = utf8ToInt("?"),
+  line_height = NULL
 )
 }
 \arguments{

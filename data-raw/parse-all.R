@@ -79,14 +79,53 @@ bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
 names(bitmaps2) <- names(bitmaps1)
 bitmaps <- bitmaps2
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Assemble vector font
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+font <- arcade
+
+vector_font_compact <- function(font) {
+  codepoints <- unique(font$codepoint)
+  row_idx <- lapply(codepoints, \(codepoint) {
+    unname(which(font$codepoint == codepoint))
+  })
+  idx <- integer(0)
+  idx[codepoints + 1] <- seq_along(codepoints)
+  
+  widths <- subset(font, stroke_idx == 1 & point_idx == 1)
+  
+  height <- font$height[1]
+  
+  font$width  <- NULL
+  font$height <- NULL
+  
+  npoints <- rle(font$codepoint)$lengths
+  npoints <- unname(npoints)
+  
+  list(
+    font_info = list(line_height = height),
+    codepoints        = codepoints,
+    coords            = font,
+    codepoint_to_idx  = idx,
+    rows              = row_idx,
+    npoints           = npoints,
+    widths            = widths$width
+  )
+}
+
+vectors <- list(
+  arcade          = vector_font_compact(arcade),
+  gridfont        = vector_font_compact(gridfont),
+  gridfont_smooth = vector_font_compact(gridfont_smooth)
+)
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save all the font data for internal use only
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 usethis::use_data(
   bitmaps,
-  arcade,
-  gridfont, gridfont_smooth,
+  vectors,
   internal = TRUE, overwrite = TRUE, compress = 'bzip2'
 )
 file.size("R/sysdata.rda")/1024/1024

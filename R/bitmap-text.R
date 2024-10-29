@@ -36,6 +36,10 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   
   stopifnot(length(text) == 1)
   
+  if (nchar(text) == 0) {
+    return(data.frame())
+  }
+  
   bitmap <- bitmaps[[font]]
   if (is.null(bitmap)) {
     stop("No such bitmap font: ", font)
@@ -94,7 +98,6 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset
-  res$line <- 1L
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
