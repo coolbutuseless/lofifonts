@@ -45,10 +45,36 @@ bitmaps[['unscii-8-thin']]  <- unscii_8_thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Reshape font to a single data.frame with index offsets
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# font  <- bitmaps[['unscii-8']]
-# dfs   <- lapply(font$chars, \(x) x$coords)
-# lens  <- vapply(dfs, nrow, integer(1))
-
+if (FALSE) {
+  
+  compact_bitmap <- function(font) {
+    # font   <- bitmaps[['unscii-8']]
+    dfs    <- lapply(font$chars, \(x) x$coords)
+    lens   <- vapply(dfs, nrow, integer(1))
+    coords <- do.call(rbind, dfs)
+    
+    row_ends    <- cumsum(lens)
+    row_starts  <- c(1, head(row_ends, -1) + 1)
+    
+    idx_to_rows <- mapply(seq.int, row_starts, row_ends, SIMPLIFY = FALSE)
+    
+    coords <- coords[, c('codepoint', 'x', 'y', 'width')]
+    
+    list(
+      font_info   = font$font_info,
+      coords      = coords,
+      idx_to_rows = idx_to_rows,
+      code_to_idx = font$idx
+    )
+  }
+  
+  bitmaps2 <- lapply(seq_along(bitmaps), function(i) {
+    print(names(bitmaps)[[i]])
+    compact_bitmap(bitmaps[[i]])
+  })
+  names(bitmaps2) <- names(bitmaps)
+  
+}
 
 
 
@@ -60,6 +86,7 @@ bitmaps[['unscii-8-thin']]  <- unscii_8_thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 usethis::use_data(
   bitmaps,
+  bitmaps2,
   arcade,
   gridfont, gridfont_smooth,
   internal = TRUE, overwrite = TRUE, compress = 'bzip2'
