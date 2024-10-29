@@ -33,7 +33,15 @@ hex_8x8_to_coords <- function(hex, codepoint) {
     }
   }) 
   char_coords <- do.call(rbind, coords)
-  if (nrow(char_coords) > 0) {
+  
+  if (nrow(char_coords) == 0) {
+    char_coords <- data.frame(
+      codepoint = codepoint,
+      x = NA_integer_,
+      y = NA_integer_,
+      width = 8L
+    )
+  } else {
     char_coords$width <- 0L
     char_coords$width[nrow(char_coords)] <- 8L
   }
@@ -56,7 +64,14 @@ hex_8x16_to_coords <- function(hex, codepoint) {
     }
   }) 
   char_coords <- do.call(rbind, coords)
-  if (nrow(char_coords) > 0) {
+  if (nrow(char_coords) == 0) {
+    char_coords <- data.frame(
+      codepoint = codepoint,
+      x = NA_integer_,
+      y = NA_integer_,
+      width = 8L
+    )
+  } else {
     char_coords$width <- 0L
     char_coords$width[nrow(char_coords)] <- 8L
   }
@@ -80,7 +95,14 @@ hex_16x16_to_coords <- function(hex, codepoint) {
     }
   }) 
   char_coords <- do.call(rbind, coords)
-  if (nrow(char_coords) > 0) {
+  if (nrow(char_coords) == 0) {
+    char_coords <- data.frame(
+      codepoint = codepoint,
+      x = NA_integer_,
+      y = NA_integer_,
+      width = 16L
+    )
+  } else {
     char_coords$width <- 0L
     char_coords$width[nrow(char_coords)] <- 16L
   }

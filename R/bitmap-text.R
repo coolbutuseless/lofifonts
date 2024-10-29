@@ -136,6 +136,9 @@ coords_to_mat <- function(df) {
   # so push them all to be at least "1", so that (x,y) coords can be used
   # as matrix indices
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  df <- df[!is.na(df$x) & !is.na(df$y),]
+  
   if (any(df$y < 1)) {
     df$y <- df$y + abs(min(df$y)) + 1L
   }

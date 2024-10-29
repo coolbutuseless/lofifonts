@@ -261,6 +261,13 @@ parse_char <- function(txt, height, codepoint_from_startchar) {
     coords$codepoint <- encoding
     coords$width <- 0L
     coords$width[nrow(coords)] <- dwidth
+  } else {
+    coords <- data.frame(
+      x = NA_integer_,
+      y = NA_integer_,
+      codepoint = encoding,
+      width = dwidth
+    )
   }
   
   
