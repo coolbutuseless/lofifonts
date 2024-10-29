@@ -79,9 +79,12 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   idxs[is.na(idxs)] <- missing
   
-  widths   <- vector$widths [idxs]
-  lens     <- vector$npoints[idxs]
-  row_idxs <- vector$rows   [idxs]
+  starts <- vector$row_start[idxs]
+  ends   <- vector$row_end  [idxs]
+  widths <- vector$width    [idxs]
+  lens   <- vector$npoints  [idxs]
+  
+  row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
   res <- vector$coords[row_idxs, ]
@@ -93,13 +96,11 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
     if (linestart[i] == linebreak[i]) {
       xoffset <- c(xoffset, 0L)
     } else {
-      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1L)])
       xoffset <- c(xoffset, 0L, this_offset)
     }
   }
-  widths
   xoffset
-  # xoffset <- c(0L, cumsum(widths)[-length(widths)])
   res$xoffset <- rep.int(xoffset, lens)
   
   
@@ -108,14 +109,13 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   res$x0        <- res$x
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
-  res$width     <- rep.int(widths, lens)
   
   line_height <- line_height %||% vector$font_info$line_height
   res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset
   
-  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0', 'width', 'xoffset')]
+  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
   res
 }

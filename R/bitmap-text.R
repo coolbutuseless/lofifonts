@@ -80,7 +80,7 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
     if (linestart[i] == linebreak[i]) {
       xoffset <- c(xoffset, 0L)
     } else {
-      this_offset <- cumsum(widths[seq(linestart[i] + 1, linebreak[i])])
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
       xoffset <- c(xoffset, 0L, this_offset)
     }
   }

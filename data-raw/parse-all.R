@@ -65,6 +65,7 @@ compact_bitmap <- function(font) {
     font_info        = font$font_info,
     coords           = coords,
     codepoint_to_idx = font$idx,
+    codepoints       = which(!is.na(font$idx)) - 1L,
     row_start        = row_starts,
     row_end          = row_ends,
     npoints          = lens,
@@ -102,14 +103,18 @@ vector_font_compact <- function(font) {
   npoints <- rle(font$codepoint)$lengths
   npoints <- unname(npoints)
   
+  row_starts <- vapply(row_idx, min, integer(1))
+  row_ends   <- vapply(row_idx, max, integer(1))
+  
   list(
     font_info = list(line_height = height),
-    codepoints        = codepoints,
     coords            = font,
+    codepoints        = codepoints,
     codepoint_to_idx  = idx,
-    rows              = row_idx,
+    row_start         = row_starts,
+    row_end           = row_ends,
     npoints           = npoints,
-    widths            = widths$width
+    width             = widths$width
   )
 }
 
