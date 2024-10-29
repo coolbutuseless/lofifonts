@@ -36,89 +36,73 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   
   stopifnot(length(text) == 1)
   
-  if (!font %in% names(bitmaps)) {
+  if (nchar(text) == 0) {
+    return(data.frame())
+  }
+  
+  bitmap <- bitmaps[[font]]
+  if (is.null(bitmap)) {
     stop("No such bitmap font: ", font)
   }
-  bitmap <- bitmaps[[font]]
   
-  codes <- utf8ToInt(text)
-  dfs   <- vector('list', length(codes))
-
-  line_height <- line_height %||% bitmap$font_info$line_height
-  yoffset     <- 0
-  xoffset     <- 0
-
-  line <- 1L
+  codepoints <- utf8ToInt(text)
   
-  for (i in seq_along(codes)) {
-    code <- codes[i]
-    
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # If it's a carriage return (i.e. \n) then recalculate the offsets
-    # and go to the next character
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if (code == 10) {
-      xoffset <- 0
-      yoffset <- yoffset - line_height
-      line    <- line + 1L
-      next
-    }
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Get the character data for the given utf8 code
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    idx <- bitmap$idx[code + 1L]
-    if (is.null(idx) || is.na(idx) || idx > length(bitmap$chars)) {
-      if (is.character(missing)) {
-        missing <- utf8ToInt(missing)[[1]]
-      }
-      code <- missing %||% bitmap$font_info$default_char %||% utf8ToInt('?') # Default to question mark
-      idx <- bitmap$idx[code + 1L]
-    }
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Get this character
-    # Offset the x,y coords based upon the position of the character
-    # add the coords data.frame to the list of all data.frames
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    this_bdf_char <- bitmap$chars[[idx]]
-    this_df      <- this_bdf_char$coords
-    this_df$x0   <- this_df$x
-    this_df$y0   <- this_df$y
-    # If this is a 'space' then often this will have no coords
-    if (!is.null(this_df) && nrow(this_df) > 0) {
-      this_df$x         <- this_df$x + xoffset
-      this_df$y         <- this_df$y + yoffset
-      this_df$codepoint <- code
-      this_df$char_idx  <- i
-      this_df$line      <- line
-      dfs[[i]]          <- this_df
-    }
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Even if a character has no coordinates (e.g. 'space') always add the
-    # character dwidth to the xoffset for positioning the next character
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    xoffset <- xoffset + this_bdf_char$dwidth
-
+  # Remove carriage returns and calculate lines
+  is_cr      <- codepoints == 10
+  line       <- cumsum(is_cr)[!is_cr]
+  codepoints <- codepoints[!is_cr]
+  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  
+  idxs <- bitmap$codepoint_to_idx[codepoints + 1L]
+  
+  # Determine what char should be used for missing
+  if (is.character(missing)) {
+    missing <- utf8ToInt(missing)[[1]]
   }
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Bind all the data.frames of coordinates together.
-  # Shift the entire set of coordinates "up" so that it nominally starts
-  # at y = 0
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  res_df   <- do.call(rbind, dfs)
-  res_df$y <- res_df$y - yoffset
-
+  missing <- missing %||% bitmap$font_info$default_char %||% utf8ToInt('?')
   
-  res_df <- res_df[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
+  idxs[is.na(idxs)] <- missing
+  
+  starts <- bitmap$row_start[idxs]
+  ends   <- bitmap$row_end  [idxs]
+  widths <- bitmap$width    [idxs]
+  lens   <- bitmap$npoints  [idxs]
+  
+  row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
+  row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
+  
+  res <- bitmap$coords[row_idxs, ]
+  
+  # xoffset needs to reset to 0 after every linebreak
+  xoffset <- integer(0)
+  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
+  for (i in seq_along(linestart)) {
+    if (linestart[i] == linebreak[i]) {
+      xoffset <- c(xoffset, 0L)
+    } else {
+      this_offset <- cumsum(widths[seq(linestart[i] + 1, linebreak[i])])
+      xoffset <- c(xoffset, 0L, this_offset)
+    }
+  }
+  xoffset
+  res$xoffset <- rep.int(xoffset, lens)
   
   
-  class(res_df) <- c('tbl_df', 'tbl', 'data.frame')
-  res_df
+  res$char_idx  <- rep.int(seq_along(idxs), lens)
+  res$codepoint <- rep.int(codepoints, lens)
+  res$x0        <- res$x
+  res$y0        <- res$y
+  res$line      <- rep.int(line, lens)
+  
+  line_height <- line_height %||% bitmap$font_info$line_height
+  res$y <- res$y + (max(res$line) - res$line) * line_height
+  
+  res$x <- res$x + res$xoffset
+  
+  res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
+  class(res) <- c('tbl_df', 'tbl', 'data.frame')
+  res
 }
-
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,6 +120,9 @@ coords_to_mat <- function(df) {
   # so push them all to be at least "1", so that (x,y) coords can be used
   # as matrix indices
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  df <- df[!is.na(df$x) & !is.na(df$y),]
+  
   if (any(df$y < 1)) {
     df$y <- df$y + abs(min(df$y)) + 1L
   }

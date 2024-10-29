@@ -13,12 +13,12 @@ source("data-raw/parse-unifont-hex.R")
 # Add the  Supplementary Multilingual Plane to the 
 #   Basic Multilingual Plane
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-idx1 <- bitmaps$unifont$idx
+idx1 <- bitmaps1$unifont$idx
 idx2 <- unifont_upper$idx
 
 # renumber the index to start after the BDF unifont reading
 # And we'll remove the codepoint '32' that's part of the upper font.
-idx <- idx2 - 1L + length(bitmaps$unifont$chars)
+idx <- idx2 - 1L + length(bitmaps1$unifont$chars)
 
 # copy the Plane0 indices
 idx[seq_along(idx1)] <- idx1
@@ -27,17 +27,97 @@ chars <- unifont_upper$chars[-1]
 length(chars)
 length(unifont_upper$chars)
 
-bitmaps$unifont$idx <- idx
-bitmaps$unifont$chars <- c(bitmaps$unifont$chars, chars)
+bitmaps1$unifont$idx <- idx
+bitmaps1$unifont$chars <- c(bitmaps1$unifont$chars, chars)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Add in unscii to the bitmaps
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmaps[['unscii-8']]       <- unscii_8
-bitmaps[['unscii-8-thin']]  <- unscii_8_thin
-# bitmaps[['unscii-16']]      <- unscii_16
-# bitmaps[['unscii-16']]      <- unscii_16_full
+bitmaps1[['unscii-8']]       <- unscii_8
+bitmaps1[['unscii-8-thin']]  <- unscii_8_thin
+
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Reshape bitmap fonts to a single data.frame with index offsets
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compact_bitmap <- function(font) {
+  # font   <- bitmaps[['unscii-8']]
+  dfs    <- lapply(font$chars, \(x) x$coords)
+  lens   <- vapply(dfs, nrow, integer(1))
+  coords <- do.call(rbind, dfs)
+  
+  row_ends    <- cumsum(lens)
+  row_starts  <- c(1, head(row_ends, -1) + 1)
+  
+  idx_to_rows <- mapply(seq.int, row_starts, row_ends, SIMPLIFY = FALSE)
+  
+  widths <- vapply(font$chars, \(char) {
+    char$coords$width[nrow(char$coords)]
+  }, integer(1))
+  coords$width <- NULL
+  
+  coords <- coords[, c('x', 'y')]
+  
+  list(
+    font_info        = font$font_info,
+    coords           = coords,
+    codepoint_to_idx = font$idx,
+    row_start        = row_starts,
+    row_end          = row_ends,
+    npoints          = lens,
+    width            = widths
+  )
+}
+
+bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
+  print(names(bitmaps1)[[i]])
+  compact_bitmap(bitmaps1[[i]])
+})
+names(bitmaps2) <- names(bitmaps1)
+bitmaps <- bitmaps2
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Assemble vector font
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+font <- arcade
+
+vector_font_compact <- function(font) {
+  codepoints <- unique(font$codepoint)
+  row_idx <- lapply(codepoints, \(codepoint) {
+    unname(which(font$codepoint == codepoint))
+  })
+  idx <- integer(0)
+  idx[codepoints + 1] <- seq_along(codepoints)
+  
+  widths <- subset(font, stroke_idx == 1 & point_idx == 1)
+  
+  height <- font$height[1]
+  
+  font$width  <- NULL
+  font$height <- NULL
+  
+  npoints <- rle(font$codepoint)$lengths
+  npoints <- unname(npoints)
+  
+  list(
+    font_info = list(line_height = height),
+    codepoints        = codepoints,
+    coords            = font,
+    codepoint_to_idx  = idx,
+    rows              = row_idx,
+    npoints           = npoints,
+    widths            = widths$width
+  )
+}
+
+vectors <- list(
+  arcade          = vector_font_compact(arcade),
+  gridfont        = vector_font_compact(gridfont),
+  gridfont_smooth = vector_font_compact(gridfont_smooth)
+)
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,11 +125,10 @@ bitmaps[['unscii-8-thin']]  <- unscii_8_thin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 usethis::use_data(
   bitmaps,
-  arcade,
-  gridfont, gridfont_smooth,
+  vectors,
   internal = TRUE, overwrite = TRUE, compress = 'bzip2'
 )
-
+file.size("R/sysdata.rda")/1024/1024
 
 
 

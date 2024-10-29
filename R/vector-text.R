@@ -2,110 +2,6 @@
 globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Create data.frame of glyph information for the given line of text.
-#'
-#' @inheritParams vector_text_coords
-#' @param missing char to use if codepoint is missing
-#'
-#' @return data.frame of stroke information
-#' \describe{
-#'   \item{\code{char_idx}}{The index of the character within the provided \code{text} string}
-#'   \item{\code{codepoint}}{Unicode codepoint (integer)}
-#'   \item{\code{stroke_idx}}{Index of the stroke within each character}
-#'   \item{\code{point_idx}}{Index of the point within each stroke}
-#'   \item{\code{x}}{Pixel coordinate x value for display}
-#'   \item{\code{y}}{Pixel coordinate y value for display}
-#'   \item{\code{width}}{Width of vector character}
-#'   \item{\code{height}}{Height of vector character}
-#'   \item{\code{x0}}{Original untransformed x-coordinate}
-#'   \item{\code{y0}}{Original untransformed y-coordinate}
-#'   \item{\code{line}}{Line number within input \code{text} where this character appears}
-#' }
-#'
-#' @importFrom utils head
-#' @family vector text functions
-#' @noRd
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_coords_single_row <- function(text, font, dx = 0, missing) {
-
-  stopifnot(length(text) == 1)
-
-  if (nchar(text) == 0) {
-    return(data.frame())
-  }
-
-  if (is.character(missing)) {
-    missing <- utf8ToInt(missing)[[1]]
-  }
-
-  font_df <- switch(
-    font,
-    gridfont        = gridfont,
-    gridfont_smooth = gridfont_smooth,
-    arcade          = arcade,
-    stop("No such font: ", font)
-  )
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # split text into characters
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if (font == 'arcade') {
-    text <- toupper(text)
-  } else {
-    text <- tolower(text)
-  }
-  
-  codepoint <- utf8ToInt(text)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Replace any unknown chars with a blank space
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  bad_idx <- !(codepoint %in% font_df$codepoint)
-  if (length(bad_idx) > 0) {
-    if (!missing %in% font_df$codepoint) {
-      missing <- utf8ToInt('?')
-    }
-    codepoint[bad_idx] <- missing
-  }
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Merge the text info with the data.frame for each character from `arcade_df`
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  string_df <- data.frame(
-    codepoint = codepoint,
-    char_idx  = seq_along(codepoint),
-    stringsAsFactors = FALSE
-  )
-
-  string_df <- merge(string_df, font_df, sort = FALSE, all.x = TRUE)
-  string_df$x0 <- string_df$x
-  string_df$y0 <- string_df$y
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Ensure correct ordering
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  string_df <- with(string_df, string_df[order(char_idx, stroke_idx, point_idx),])
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Calculate the character offset
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  width_df <- subset(string_df, stroke_idx == 1 & point_idx == 1)
-  width_df <- width_df[, c('char_idx', 'width')]
-  width_df$xoffset <- c(0, cumsum(head(width_df$width, -1) + dx))
-  width_df$width <- NULL
-
-  string_df <- merge(string_df, width_df, sort = FALSE, all.x = TRUE)
-  string_df <- transform(string_df, x = x + xoffset)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Ensure correct ordering
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  string_df <- with(string_df, string_df[order(char_idx, stroke_idx, point_idx),])
-  string_df$xoffset <- NULL
-
-  string_df
-}
-
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,6 +16,7 @@ vector_text_coords_single_row <- function(text, font, dx = 0, missing) {
 #' @param dy Additional character spacing in the vertical direction. Default: 0
 #' @param missing Codepoint to use if glyph not available in font. default: Codepoint
 #'        for '?'
+#' @param line_height line height
 #'
 #' @return data.frame of stroke information
 #' \describe{
@@ -141,51 +38,85 @@ vector_text_coords_single_row <- function(text, font, dx = 0, missing) {
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'arcade'), 
-                               dx = 0, dy = 0, missing = utf8ToInt('?')) {
+                               dx = 0, dy = 0, missing = utf8ToInt('?'), line_height = NULL) {
 
+  
   stopifnot(length(text) == 1)
+  
+  if (nchar(text) == 0) {
+    return(data.frame())
+  }
+  
   font <- match.arg(font)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Split the text at "\n" boundaries
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  texts  <- strsplit(text, "\n")[[1]]
-  nchars <- cumsum(nchar(texts))
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Create a string for each line
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  dfs <- lapply(texts, vector_text_coords_single_row, font = font, dx = dx, missing = missing)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Update line numbering and character indices
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  for (i in seq_along(dfs)) {
-    if (nrow(dfs[[i]]) == 0) next
-    dfs[[i]]$line     <- i
-    if (i > 1) {
-      dfs[[i]]$char_idx <- dfs[[i]]$char_idx + nchars[i-1]
+  # arcade is only lower case. gridfont is only uppercase
+  if (font == 'arcade') {
+    text <- toupper(text)
+  } else {
+    text <- tolower(text)
+  }
+  
+  
+  vector <- vectors[[font]]
+  if (is.null(vector)) {
+    stop("No such vector font: ", font)
+  }
+  
+  codepoints <- utf8ToInt(text)
+  
+  # Remove carriage returns and calculate lines
+  is_cr      <- codepoints == 10
+  line       <- cumsum(is_cr)[!is_cr]
+  codepoints <- codepoints[!is_cr]
+  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  
+  idxs <- vector$codepoint_to_idx[codepoints + 1L]
+  
+  # Determine what char should be used for missing
+  if (is.character(missing)) {
+    missing <- utf8ToInt(missing)[[1]]
+  }
+  missing <- missing %||% vector$font_info$default_char %||% utf8ToInt('?')
+  
+  idxs[is.na(idxs)] <- missing
+  
+  widths   <- vector$widths [idxs]
+  lens     <- vector$npoints[idxs]
+  row_idxs <- vector$rows   [idxs]
+  row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
+  
+  res <- vector$coords[row_idxs, ]
+  
+  # xoffset needs to reset to 0 after every linebreak
+  xoffset <- integer(0)
+  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
+  for (i in seq_along(linestart)) {
+    if (linestart[i] == linebreak[i]) {
+      xoffset <- c(xoffset, 0L)
+    } else {
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
+      xoffset <- c(xoffset, 0L, this_offset)
     }
   }
-
-  font_df <- switch(
-    font,
-    gridfont        = gridfont,
-    gridfont_smooth = gridfont_smooth,
-    arcade          = arcade,
-    stop("No such font: ", font)
-  )
+  widths
+  xoffset
+  # xoffset <- c(0L, cumsum(widths)[-length(widths)])
+  res$xoffset <- rep.int(xoffset, lens)
   
   
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # combined all data.frames for each line, offset the y for each line
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  res <- do.call(rbind, dfs)
-  res$y <- res$y - (res$line - 1) * (font_df$height[1] + dy)
-
-  # Reposition so that bottom of text is (1, 1)
-  res$y <- res$y - min(res$y, na.rm = TRUE)
+  res$char_idx  <- rep.int(seq_along(idxs), lens)
+  res$codepoint <- rep.int(codepoints, lens)
+  res$x0        <- res$x
+  res$y0        <- res$y
+  res$line      <- rep.int(line, lens)
+  res$width     <- rep.int(widths, lens)
   
+  line_height <- line_height %||% vector$font_info$line_height
+  res$y <- res$y + (max(res$line) - res$line) * line_height
+  
+  res$x <- res$x + res$xoffset
+  
+  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0', 'width', 'xoffset')]
+  class(res) <- c('tbl_df', 'tbl', 'data.frame')
   res
 }
 
@@ -249,6 +180,7 @@ vector_text_matrix <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   df <- vector_text_coords(text = text, font = font, dx = dx, dy = dy, missing = missing)
   
+  df <- df[!is.na(df$x) & !is.na(df$y), ]
   df$x <- df$x * scale + 1L
   df$y <- df$y * scale + 1L
   

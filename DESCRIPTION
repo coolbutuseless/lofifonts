@@ -1,7 +1,7 @@
 Package: lofifonts
 Type: Package
 Title: Text Rendering with Bitmap and Vector Fonts
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person("Mike", "Cheng", role = c("aut", "cre", 'cph'), email = "mikefc@coolbutuseless.com"),
     person("Frederic", "Cambus", role = c("aut", "cph"), email = "fred@statdns.com", comment = "Creator of 'spleen' font"),
