@@ -111,13 +111,13 @@ bitmap_text_coords("Hello", font = 'unifont') |>
   head()
 ```
 
-    #>   char_idx codepoint x  y line x0 y0
-    #> 1        1        72 7 10    1  7 10
-    #> 2        1        72 2 10    1  2 10
-    #> 3        1        72 7  9    1  7  9
-    #> 4        1        72 2  9    1  2  9
-    #> 5        1        72 7  8    1  7  8
-    #> 6        1        72 2  8    1  2  8
+    #>      char_idx codepoint x  y line x0 y0
+    #> 2524        1        72 7 10    1  7 10
+    #> 2525        1        72 2 10    1  2 10
+    #> 2526        1        72 7  9    1  7  9
+    #> 2527        1        72 2  9    1  2  9
+    #> 2528        1        72 7  8    1  7  8
+    #> 2529        1        72 2  8    1  2  8
 
 ``` r
 bitmap_text_matrix("Hello", "unifont") 
@@ -204,13 +204,13 @@ coords <- bitmap_text_coords("Hello\n#RStats", "spleen-6x12")
 head(coords)
 ```
 
-    #>   char_idx codepoint x  y line x0 y0
-    #> 1        1        72 5 20    1  5  8
-    #> 2        1        72 1 20    1  1  8
-    #> 3        1        72 5 19    1  5  7
-    #> 4        1        72 1 19    1  1  7
-    #> 5        1        72 5 18    1  5  6
-    #> 6        1        72 1 18    1  1  6
+    #>     char_idx codepoint x y line x0 y0
+    #> 516        1        72 5 8    1  5  8
+    #> 517        1        72 1 8    1  1  8
+    #> 518        1        72 5 7    1  5  7
+    #> 519        1        72 1 7    1  1  7
+    #> 520        1        72 5 6    1  5  6
+    #> 521        1        72 1 6    1  1  6
 
 ``` r
 grid.newpage()

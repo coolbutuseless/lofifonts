@@ -2,12 +2,9 @@
 % Please edit documentation in R/bitmap-text.R
 \name{bitmap_text_coords}
 \alias{bitmap_text_coords}
-\alias{bitmap_text_coords2}
 \title{Create a data.frame of pixel coordinate information of the rendered text}
 \usage{
 bitmap_text_coords(text, font = "unifont", line_height = NULL, missing = NULL)
-
-bitmap_text_coords2(text, font = "unifont", line_height = NULL, missing = NULL)
 }
 \arguments{
 \item{text}{Single text string. Can include carriage returns.}
