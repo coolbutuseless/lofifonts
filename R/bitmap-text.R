@@ -120,6 +120,53 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
 }
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' @rdname bitmap_text_coords
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bitmap_text_coords2 <- function(text, font = "unifont", line_height = NULL, missing = NULL) {
+  
+  stopifnot(length(text) == 1)
+  
+  bitmap <- bitmaps2[[font]]
+  if (is.null(bitmap)) {
+    stop("No such bitmap font: ", font)
+  }
+  
+  codepoints <- utf8ToInt(text)
+
+  idxs <- bitmap$code_to_idx[codepoints + 1L]
+  
+  # Determine what char should be used for missing
+  if (is.character(missing)) {
+    missing <- utf8ToInt(missing)[[1]]
+  }
+  missing <- missing %||% bitmap$font_info$default_char %||% utf8ToInt('?')
+  
+  idxs[is.na(idxs)] <- missing
+  
+  # message("TODO: handle \\n characters")
+  # message("TODO: add line")
+  # message("TODO: y offset")
+  
+  row_idxs <- bitmap$idx_to_rows[idxs]
+  lens     <- lengths(row_idxs)
+  row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
+  
+  res <- bitmap$coords[row_idxs, ]
+  res$xoffset  <- cumsum(res$width) - res$width
+  res$char_idx <- rep.int(seq_along(idxs), lens)
+  res$x0       <- res$x
+  res$y0       <- res$y
+  
+  res$x <- res$x + res$xoffset
+  res$line <- 1L
+  
+  res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
+  class(res) <- c('tbl_df', 'tbl', 'data.frame')
+  res
+}
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Convert a data.frame of (x,y) coords into a matrix
