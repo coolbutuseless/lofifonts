@@ -257,7 +257,13 @@ parse_char <- function(txt, height, codepoint_from_startchar) {
   if (!is.null(coords) && nrow(coords) > 0) {
     coords$x <- coords$x + bbox[3]
     coords$y <- coords$y + bbox[4]
+    
+    coords$codepoint <- encoding
+    coords$width <- 0L
+    coords$width[nrow(coords)] <- dwidth
   }
+  
+  
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # This characters definition

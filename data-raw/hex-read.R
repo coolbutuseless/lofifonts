@@ -148,21 +148,6 @@ read_hex_8x8 <- function(hex_file) {
 }
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Reshape font to a single data.frame with index offsets
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-read_hex_8x8_redux <- function(hex_file) {
-  font <- read_hex_8x8(hex_file)
-  
-  font <- bitmaps$`unscii-8`
-  dfs <- lapply(font$chars, \(x) x$coords)
-  lens <- vapply(dfs, nrow, integer(1))
-  
-}
-
-
-
-
 
 
 

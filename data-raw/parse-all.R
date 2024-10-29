@@ -40,6 +40,21 @@ bitmaps[['unscii-8-thin']]  <- unscii_8_thin
 # bitmaps[['unscii-16']]      <- unscii_16_full
 
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Reshape font to a single data.frame with index offsets
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# font  <- bitmaps[['unscii-8']]
+# dfs   <- lapply(font$chars, \(x) x$coords)
+# lens  <- vapply(dfs, nrow, integer(1))
+
+
+
+
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save all the font data for internal use only
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
