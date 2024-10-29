@@ -310,6 +310,11 @@ for (font_name in names(font_info$vector)) {
 ```
 
 
+```{r echo=FALSE, eval=FALSE}
+set.seed(1); lorem::ipsum(2) |> strwrap(40) |> paste(collapse = "\n") -> txt
+bitmap_text_raster(txt) |> bench::mark()
+```
+
 
 
 
