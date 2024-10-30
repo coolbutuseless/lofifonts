@@ -63,10 +63,11 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   
   idxs[is.na(idxs)] <- missing
   
-  starts <- bitmap$row_start[idxs]
-  ends   <- bitmap$row_end  [idxs]
-  widths <- bitmap$width    [idxs]
-  lens   <- bitmap$npoints  [idxs]
+  glyphs <- bitmap$glyph_info[idxs, , drop = FALSE]
+  starts <- glyphs$row_start
+  ends   <- glyphs$row_end  
+  widths <- glyphs$width    
+  lens   <- glyphs$npoints  
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
@@ -94,7 +95,7 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- line_height %||% bitmap$font_info$line_height
+  line_height <- line_height %||% bitmap$line_height
   res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset

@@ -1,5 +1,6 @@
 ## code to prepare `DATASET` dataset goes here
 
+source("data-raw/bdf-read.R")
 
 bdf_files <- list.files("data-raw/fonts/", pattern = "bdf$", full.names = TRUE)
 bdf_files

@@ -79,10 +79,11 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   idxs[is.na(idxs)] <- missing
   
-  starts <- vector$row_start[idxs]
-  ends   <- vector$row_end  [idxs]
-  widths <- vector$width    [idxs]
-  lens   <- vector$npoints  [idxs]
+  glyphs <- vector$glyph_info[idxs, , drop = FALSE]
+  starts <- glyphs$row_start
+  ends   <- glyphs$row_end  
+  widths <- glyphs$width    
+  lens   <- glyphs$npoints  
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
@@ -110,7 +111,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- line_height %||% vector$font_info$line_height
+  line_height <- line_height %||% vector$line_height
   res$y <- res$y + (max(res$line) - res$line) * line_height
   
   res$x <- res$x + res$xoffset

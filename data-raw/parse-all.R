@@ -61,16 +61,23 @@ compact_bitmap <- function(font) {
   
   coords <- coords[, c('x', 'y')]
   
-  list(
-    font_info        = font$font_info,
+  glyph_info <- data.frame(
+    codepoints = which(!is.na(font$idx)) - 1L,
+    npoints    = lens,
+    row_start  = row_starts,
+    row_end    = row_ends,
+    width      = widths
+  )
+  row.names(glyph_info) <- NULL
+  
+  res <- list(
     coords           = coords,
     codepoint_to_idx = font$idx,
-    codepoints       = which(!is.na(font$idx)) - 1L,
-    row_start        = row_starts,
-    row_end          = row_ends,
-    npoints          = lens,
-    width            = widths
+    line_height      = font$font_info$line_height,
+    glyph_info       = glyph_info
   )
+  class(res) <- 'lofifont'
+  res
 }
 
 bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
@@ -106,16 +113,24 @@ vector_font_compact <- function(font) {
   row_starts <- vapply(row_idx, min, integer(1))
   row_ends   <- vapply(row_idx, max, integer(1))
   
-  list(
-    font_info = list(line_height = height),
-    coords            = font,
-    codepoints        = codepoints,
-    codepoint_to_idx  = idx,
-    row_start         = row_starts,
-    row_end           = row_ends,
-    npoints           = npoints,
-    width             = widths$width
+  glyph_info <- data.frame(
+    codepoint = codepoints,
+    npoints   = npoints,
+    row_start = row_starts,
+    row_end   = row_ends,
+    width     = widths$width
   )
+  row.names(glyph_info) <- NULL
+  
+  
+  res <- list(
+    coords            = font,
+    codepoint_to_idx  = idx,
+    line_height       = height,
+    glyph_info        = glyph_info
+  )
+  class(res) <- 'lofifont'
+  res
 }
 
 vectors <- list(
