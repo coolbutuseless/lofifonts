@@ -2,20 +2,20 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Common funtion for extracting data.frames from a lofifont
+#' Common funtion for extracting data.frames from a lofi font
 #' This works with both bitmap and vector fonts
 #' 
 #' @param text string
-#' @param lofifont lofifont object
+#' @param lofi lofi font object
 #' @param dx,dy extra spacing offsets for each character
 #' @param missing which character to use if any codepoint is not available in 
 #'        this font
 #' @return data.frame of coordinates/lines for this text
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
+lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   
-  stopifnot(inherits(lofifont, 'lofifont'))
+  stopifnot(inherits(lofi, 'lofi'))
   
   codepoints <- utf8ToInt(text)
   
@@ -25,16 +25,16 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   codepoints <- codepoints[!is_cr]
   linebreak  <- c(which(diff(line) > 0), length(codepoints))
   
-  idxs <- lofifont$codepoint_to_idx[codepoints + 1L]
+  idxs <- lofi$codepoint_to_idx[codepoints + 1L]
   
   if (anyNA(idxs)) {
     # Determine what char should be used for missing
-    missing <- missing %||% lofifont$default_codepoint %||% utf8ToInt('?')
+    missing <- missing %||% lofi$default_codepoint %||% utf8ToInt('?')
     if (is.character(missing)) {
       missing <- utf8ToInt(missing)[[1]]
     }
     
-    if (!missing %in% lofifont$glyph_info$codepoint) {
+    if (!missing %in% lofi$glyph_info$codepoint) {
       stop("Codepoint for missing glyphs is not part of this font! Codepoint = ", missing)  
     }
     
@@ -42,7 +42,7 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   }
   
   
-  glyphs <- lofifont$glyph_info[idxs, , drop = FALSE]
+  glyphs <- lofi$glyph_info[idxs, , drop = FALSE]
   starts <- glyphs$row_start
   ends   <- glyphs$row_end  
   widths <- glyphs$width    
@@ -51,7 +51,7 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
-  res <- lofifont$coords[row_idxs, ]
+  res <- lofi$coords[row_idxs, ]
   
   # adjust widths if requested
   widths <- widths + as.integer(dx)
@@ -77,7 +77,7 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- lofifont$line_height %||% (max(res$y0) + 1L)
+  line_height <- lofi$line_height %||% (max(res$y0) + 1L)
   res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
   
   res$x <- res$x + res$xoffset
@@ -86,42 +86,42 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
 }
 
 
-assert_lofifont <- function(lofifont) {
+assert_lofi <- function(lofi) {
   stopifnot(exprs = {
-    inherits(lofifont, 'lofifont')
-     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofifont))
+    inherits(lofi, 'lofi')
+     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofi))
      
-     is.data.frame(lofifont$coords)
-     nrow(lofifont$coords) > 0
+     is.data.frame(lofi$coords)
+     nrow(lofi$coords) > 0
      
-     is.atomic(lofifont$codepoint_to_idx)
-     length(lofifont$codepoint_to_idx) > 0
+     is.atomic(lofi$codepoint_to_idx)
+     length(lofi$codepoint_to_idx) > 0
      
-     is.numeric(lofifont$default_codepoint)
-     length(lofifont$default_codepoint) == 1
+     is.numeric(lofi$default_codepoint)
+     length(lofi$default_codepoint) == 1
      
-     is.numeric(lofifont$line_height)
-     length(lofifont$line_height) == 1
+     is.numeric(lofi$line_height)
+     length(lofi$line_height) == 1
      
-     is.data.frame(lofifont$glyph_info)
-     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofifont$glyph_info))
-     nrow(lofifont$glyph_info) > 0
+     is.data.frame(lofi$glyph_info)
+     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofi$glyph_info))
+     nrow(lofi$glyph_info) > 0
   })
   TRUE
 }
 
-assert_vector_lofifont <- function(lofifont) {
-  assert_lofifont(lofifont)
+assert_lofi_vector <- function(lofi) {
+  assert_lofi(lofi)
   stopifnot(exprs = {
-    all(c("stroke_idx", "x", "y") %in% names(lofifont$coords))
+    all(c("stroke_idx", "x", "y") %in% names(lofi$coords))
   })
   TRUE
 }
 
-assert_bitmap_lofifont <- function(lofifont) {
-  assert_lofifont(lofifont)
+assert_lofi_bitmap <- function(lofi) {
+  assert_lofi(lofi)
   stopifnot(exprs = {
-    all(c("x", "y") %in% names(lofifont$coords))
+    all(c("x", "y") %in% names(lofi$coords))
   })
   TRUE
 }
@@ -169,17 +169,17 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
     return(data.frame())
   }
   
-  if (inherits(font, 'lofifont')) {
-    assert_bitmap_lofifont(font)
-    lofifont <- font
+  if (inherits(font, 'lofi')) {
+    assert_lofi_bitmap(font)
+    lofi <- font
   } else {
-    lofifont <- bitmap_fonts[[font]]
+    lofi <- bitmap_fonts[[font]]
   }
-  if (is.null(lofifont)) {
+  if (is.null(lofi)) {
     stop("No such bitmap font: ", font)
   }
   
-  res <- lofi_text_coords(text, lofifont = lofifont, dx = dx, dy = dy, missing = missing)
+  res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')

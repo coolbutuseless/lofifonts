@@ -121,7 +121,7 @@ convert_bm_font_to_lofi <- function(font) {
     glyph_info        = glyphs
   )
   
-  class(lofi) <- c('lofifont', 'lofifont-bitmap')
+  class(lofi) <- c('lofi', 'lofi-bitmap')
   lofi
 }
 

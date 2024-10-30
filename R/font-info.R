@@ -2,20 +2,23 @@
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Return the names of all included fonts
-#' @param type font type. Either 'bitmap' or 'vector'.
+#' @param type font type. Either 'bitmap', 'vector' or 'all'
 #' @return List of two elements: names of bitmap fonts, names of vector fonts
 #' @examples
 #' get_lofi_names('bitmap')
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 get_lofi_names <- function(type) {
-  if (type == 'bitmap') {
-    names(bitmap_fonts)
-  } else if (type == 'vector') {
-    names(vector_fonts)
-  } else {
-    c(names(bitmap_fonts), names(vector_fonts))
-  }
+  
+  switch(
+    type,
+    bitmap = names(bitmap_fonts),
+    vector = names(vector_fonts),
+    all    = c(names(bitmap_fonts), names(vector_fonts)),
+    
+    # default
+    stop("'type' must be one of 'bitmap', 'vector', 'all'")
+  )
 }
 
 

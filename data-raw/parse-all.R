@@ -90,7 +90,7 @@ compact_bitmap <- function(font) {
     default_codepoint = default_codepoint,
     glyph_info        = glyph_info
   )
-  class(res) <- c('lofifont', 'lofifont-bitmap')
+  class(res) <- c('lofi', 'lofi-bitmap')
   res
 }
 
@@ -148,7 +148,7 @@ vector_font_compact <- function(font) {
     default_codepoint = utf8ToInt('?'),
     glyph_info        = glyph_info
   )
-  class(res) <- c('lofifont', 'lofifont-vector')
+  class(res) <- c('lofi', 'lofi-vector')
   res
 }
 

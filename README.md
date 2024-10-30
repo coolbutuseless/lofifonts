@@ -354,19 +354,19 @@ package which supports reading and manipulating many different types of
 bitmap font.
 
 To use a font loaded with `bittermelon` is must first be convert to the
-`lofifont` format which this package understands.
+`lofi` format which this package understands.
 
 ``` r
 # Load font using "bittermelon"
 filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
 bmfont <- bittermelon::read_yaff(filename)
 
-# Convert to lofifont format
+# Convert to lofi format
 lofi <- convert_bm_font_to_lofi(bmfont)
 lofi
 ```
 
-    #> [lofifont] 4 x 6. 919 codepoints.
+    #> [lofi font] 4 x 6. 919 codepoints.
 
 ``` r
 # Layout the text and render to a raster

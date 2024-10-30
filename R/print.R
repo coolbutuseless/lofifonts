@@ -8,7 +8,7 @@
 #' @importFrom stats median
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print.lofifont <- function(x, ...) {
+print.lofi <- function(x, ...) {
   
   widths <- sort(unique(x$glyph_info$width))
   
@@ -25,7 +25,7 @@ print.lofifont <- function(x, ...) {
   
   
   msg <- sprintf(
-    "[lofifont] %i x %i. %i codepoints.%s\n", 
+    "[lofi font] %i x %i. %i codepoints.%s\n", 
     median(x$glyph_info$width), 
     x$line_height,
     nrow(x$glyph_info),

@@ -102,7 +102,7 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 ## Included fonts
 
 ```{r}
-# font_names
+get_lofi_names('all')
 ```
 
 
@@ -258,14 +258,14 @@ ggplot(coords) +
 which supports reading and manipulating many different types of bitmap font.
 
 To use a font loaded with `bittermelon` is must first be convert to the 
-`lofifont` format which this package understands.
+`lofi` format which this package understands.
 
 ```{r}
 # Load font using "bittermelon"
 filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
 bmfont <- bittermelon::read_yaff(filename)
 
-# Convert to lofifont format
+# Convert to lofi format
 lofi <- convert_bm_font_to_lofi(bmfont)
 lofi
 

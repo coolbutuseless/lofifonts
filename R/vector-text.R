@@ -45,9 +45,9 @@ vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
     return(data.frame())
   }
   
-  if (inherits(font, 'lofifont')) {
-    assert_vector_lofifont(font)
-    lofifont <- font 
+  if (inherits(font, 'lofi')) {
+    assert_lofi_vector(font)
+    lofi <- font 
   } else {
     font <- match.arg(font)
     # arcade is only lower case. gridfont is only uppercase
@@ -57,16 +57,16 @@ vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
       text <- tolower(text)
     }
     
-    lofifont <- vector_fonts[[font]]
+    lofi <- vector_fonts[[font]]
   }
   
   
-  if (is.null(lofifont)) {
+  if (is.null(lofi)) {
     stop("No such vector font: ", font)
   }
   
   
-  res <- lofi_text_coords(text, lofifont = lofifont, dx = dx, dy = dy, missing = missing)
+  res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')

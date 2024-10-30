@@ -2,36 +2,17 @@
 % Please edit documentation in R/font-info.R
 \name{get_lofi_names}
 \alias{get_lofi_names}
-\title{#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' List of included bitmap fonts. 
-#' 
-#' Each font is an object with class 'lofifont'
-#' 
-#' \describe{
-#'   \item{coords}{data.frame}
-#' }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"bitmap_fonts"}
+\title{Return the names of all included fonts}
 \usage{
 get_lofi_names(type)
 }
 \arguments{
-\item{type}{font type. Either 'bitmap' or 'vector'.}
+\item{type}{font type. Either 'bitmap', 'vector' or 'all'}
 }
 \value{
 List of two elements: names of bitmap fonts, names of vector fonts
 }
 \description{
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' List of included vector fonts. 
-#' 
-#' Each font is an object with class 'lofifont'
-#' 
-#' \describe{
-#'   \item{coords}{data.frame}
-#' }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"vector_fonts"
 Return the names of all included fonts
 }
 \examples{
