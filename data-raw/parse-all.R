@@ -81,6 +81,8 @@ compact_bitmap <- function(font) {
     default_codepoint <- as.integer(default_char)
   }  
   
+  class(coords) <- c('tbl_df', 'tbl', 'data.frame')
+  
   res <- list(
     coords            = coords,
     codepoint_to_idx  = font$idx,
@@ -88,7 +90,7 @@ compact_bitmap <- function(font) {
     default_codepoint = default_codepoint,
     glyph_info        = glyph_info
   )
-  class(res) <- 'lofifont'
+  class(res) <- c('lofifont', 'lofifont-bitmap')
   res
 }
 
@@ -96,7 +98,7 @@ bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
   print(names(bitmaps1)[[i]])
   compact_bitmap(bitmaps1[[i]])
 })
-names(bitmaps2) <- names(bitmaps1)
+names(bitmaps2) <- tolower(names(bitmaps1))
 bitmaps <- bitmaps2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,6 +139,8 @@ vector_font_compact <- function(font) {
   font$codepoint <- NULL
   font$point_idx <- NULL
   
+  class(font) <- c('tbl_df', 'tbl', 'data.frame')
+  
   res <- list(
     coords            = font,
     codepoint_to_idx  = idx,
@@ -144,61 +148,64 @@ vector_font_compact <- function(font) {
     default_codepoint = utf8ToInt('?'),
     glyph_info        = glyph_info
   )
-  class(res) <- 'lofifont'
+  class(res) <- c('lofifont', 'lofifont-vector')
   res
 }
 
-vectors <- list(
+vector_fonts <- list(
   arcade          = vector_font_compact(arcade),
   gridfont        = vector_font_compact(gridfont),
   gridfont_smooth = vector_font_compact(gridfont_smooth)
 )
 
 
+bitmap_fonts <- bitmaps
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save all the font data for internal use only
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 usethis::use_data(
-  bitmaps,
-  vectors,
+  bitmap_fonts,
+  vector_fonts,
   internal = TRUE, overwrite = TRUE, compress = 'bzip2'
 )
-file.size("R/sysdata.rda")/1024/1024
+# file.size("R/sysdata.rda")/1024/1024
 
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create the vectors of codepoints for each bitmap font
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bdf_names
-
-font_info <- list()
-font_info$bitmap <- lapply(bitmaps, function(bdf) {
-  cp <- which(!is.na(bdf$idx)) - 1L
-  list(codepoints = sort(cp))
-})
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract the codepoints from the vector fonts
-# Assemble all the font information
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-font_info$vector <- list()
-font_info$vector$arcade          <- list(codepoints = unique(arcade$codepoint))
-font_info$vector$gridfont        <- list(codepoints = unique(gridfont$codepoint))
-font_info$vector$gridfont_smooth <- list(codepoints = unique(gridfont_smooth$codepoint))
-
-font_names <- list(
-  bitmap = names(font_info$bitmap),
-  vector = names(font_info$vector)
-)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Save the font information for the user of the package
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-usethis::use_data(
-  font_info,
-  font_names,
-  internal = FALSE,
-  overwrite = TRUE
-)
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Create the vectors of codepoints for each bitmap font
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# bdf_names
+# 
+# font_info <- list()
+# font_info$bitmap <- lapply(bitmaps, function(bdf) {
+#   cp <- which(!is.na(bdf$idx)) - 1L
+#   list(codepoints = sort(cp))
+# })
+# 
+# 
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Extract the codepoints from the vector fonts
+# # Assemble all the font information
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# font_info$vector <- list()
+# font_info$vector$arcade          <- list(codepoints = unique(arcade$codepoint))
+# font_info$vector$gridfont        <- list(codepoints = unique(gridfont$codepoint))
+# font_info$vector$gridfont_smooth <- list(codepoints = unique(gridfont_smooth$codepoint))
+# 
+# font_names <- list(
+#   bitmap = names(font_info$bitmap),
+#   vector = names(font_info$vector)
+# )
+# 
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Save the font information for the user of the package
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# usethis::use_data(
+#   font_info,
+#   font_names,
+#   internal = FALSE,
+#   overwrite = TRUE
+# )

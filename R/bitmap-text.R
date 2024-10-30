@@ -173,7 +173,7 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
     assert_bitmap_lofifont(font)
     lofifont <- font
   } else {
-    lofifont <- bitmaps[[font]]
+    lofifont <- bitmap_fonts[[font]]
   }
   if (is.null(lofifont)) {
     stop("No such bitmap font: ", font)

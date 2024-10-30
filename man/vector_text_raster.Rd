@@ -6,7 +6,7 @@
 \usage{
 vector_text_raster(
   text,
-  font = c("gridfont", "gridfont_smooth", "arcade"),
+  font = c("gridfont_smooth", "gridfont", "arcade"),
   scale = 10,
   dx = NULL,
   dy = NULL,

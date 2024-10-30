@@ -9,17 +9,30 @@
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print.lofifont <- function(x, ...) {
-  cat("[lofi font]\n")
-  cat("  codepoints : ", nrow(x$glyph_info), "\n")
-  cat("  num coords : ", nrow(x$coords), "\n")
-  cat(
-    "  width      : ", 
-    min   (x$glyph_info$width), 
+  
+  widths <- sort(unique(x$glyph_info$width))
+  
+  if (length(widths) == 1) {
+    width_txt <- ''
+  } else {
+    width_txt <- sprintf(
+      "  Width min/median/max = %i, %i, %i",
+      min   (x$glyph_info$width), 
+      median(x$glyph_info$width), 
+      max   (x$glyph_info$width)
+    )
+  }
+  
+  
+  msg <- sprintf(
+    "[lofifont] %i x %i. %i codepoints.%s\n", 
     median(x$glyph_info$width), 
-    max   (x$glyph_info$width), 
-    "(min/median/max)\n"
+    x$line_height,
+    nrow(x$glyph_info),
+    width_txt
   )
-  cat("  line height: ", x$line_height, "\n")
+  cat(msg)
+  
   invisible(x)
 }
 

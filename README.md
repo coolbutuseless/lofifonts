@@ -30,15 +30,15 @@ This package will render text with a specified bitmap or vector font to:
 ### What’s in the box
 
 - Bitmap font functions
-  - `bitmap_text_coords()` returns a data.frame of pixel locations
-  - `bitmap_text_matrix()` returns a binary matrix with pixel locations
+  - `bitmap_text_coords()` create a data.frame of pixel locations
+  - `bitmap_text_matrix()` create a binary matrix with pixel locations
     set to 1
-  - `bitmap_text_raster()` returns a raster image of the text
+  - `bitmap_text_raster()` create a raster image of the text
 - Vector font functions
-  - `vector_text_coords()` returns a data.frame of strokes
-  - `vector_text_matrix()` returns a binary matrix with pixel locations
+  - `vector_text_coords()` create a data.frame of strokes
+  - `vector_text_matrix()` create a binary matrix with pixel locations
     set to 1
-  - `vector_text_raster()` returns a raster image of the text
+  - `vector_text_raster()` create a raster image of the text
 
 ### Fonts
 
@@ -83,19 +83,8 @@ remotes::install_github('coolbutuseless/lofifonts')
 ## Included fonts
 
 ``` r
-font_names
+# font_names
 ```
-
-    #> $bitmap
-    #>  [1] "spleen-12x24"  "spleen-16x32"  "spleen-32x64"  "spleen-5x8"   
-    #>  [5] "spleen-6x12"   "spleen-8x16"   "Tamzen10x20b"  "Tamzen10x20r" 
-    #>  [9] "Tamzen5x9b"    "Tamzen5x9r"    "Tamzen6x12b"   "Tamzen6x12r"  
-    #> [13] "Tamzen7x13b"   "Tamzen7x13r"   "Tamzen7x14b"   "Tamzen7x14r"  
-    #> [17] "Tamzen8x15b"   "Tamzen8x15r"   "Tamzen8x16b"   "Tamzen8x16r"  
-    #> [21] "unifont"       "unscii-8"      "unscii-8-thin"
-    #> 
-    #> $vector
-    #> [1] "arcade"          "gridfont"        "gridfont_smooth"
 
 ## Bitmap font: Rendering text
 
@@ -236,7 +225,7 @@ Text may be rendered with a vector font to
 
 ``` r
 library(lofifonts)
-vector_text_coords("Hello", font = 'gridfont_smooth') |> 
+vector_text_coords("Hello") |> 
   head()
 ```
 
@@ -249,7 +238,7 @@ vector_text_coords("Hello", font = 'gridfont_smooth') |>
     #> 499        1       104          2 1.1666667 7.000000    0 1.1666667 7.000000
 
 ``` r
-vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
+vector_text_matrix("Hello", scale = 1) 
 ```
 
     #>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
@@ -276,7 +265,7 @@ vector_text_matrix("Hello", "gridfont_smooth", scale = 1)
     #> [10,]     0     0     0     0     0
 
 ``` r
-vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
+vector_text_raster("Hello\n#RStats!", scale = 5) |>
   plot(interpolate = FALSE)
 ```
 
@@ -288,7 +277,8 @@ This is an example of bespoke rendering of the strokes for an example
 string.
 
 For each character (`char_idx`) there are 1-or-more strokes (`stroke`).
-Each stroke has at least 2 points (indicated by `idx`).
+Each stroke has has 2 or more rows giving the path for this particular
+stroke.
 
 When plotting with ggplot, draw path for the
 points-within-strokes-within-characters.
@@ -296,7 +286,7 @@ points-within-strokes-within-characters.
 ``` r
 library(ggplot2)
 
-coords <- vector_text_coords("Hello", "gridfont_smooth")
+coords <- vector_text_coords("Hello")
 head(coords)
 ```
 
@@ -360,7 +350,7 @@ ggplot(coords) +
 ## Rendering with `{bittermelon}` fonts
 
 [`bittermelon`](https://cran.r-project.org/package=bittermelon) is a
-package which supports readind and manipulating many different types of
+package which supports reading and manipulating many different types of
 bitmap font.
 
 To use a font loaded with `bittermelon` is must first be convert to the
@@ -376,11 +366,7 @@ lofi <- convert_bm_font_to_lofi(bmfont)
 lofi
 ```
 
-    #> [lofi font]
-    #>   codepoints :  919 
-    #>   num coords :  7558 
-    #>   width      :  4 4 4 (min/median/max)
-    #>   line height:  6
+    #> [lofifont] 4 x 6. 919 codepoints.
 
 ``` r
 # Layout the text and render to a raster
@@ -420,7 +406,7 @@ oldpar <- par(mai = c(0, 0, 0, 0))
 lorem::ipsum(1) |>
   strwrap(60) |>
   paste(collapse = "\n") |>
-  vector_text_raster(font = 'gridfont_smooth') |>
+  vector_text_raster() |>
   plot(interpolate = FALSE)
 ```
 

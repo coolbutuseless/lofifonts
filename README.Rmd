@@ -102,7 +102,7 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 ## Included fonts
 
 ```{r}
-font_names
+# font_names
 ```
 
 
@@ -175,18 +175,18 @@ Text may be rendered with a vector font to
 
 ```{r vector-coords, fig.height = 3}
 library(lofifonts)
-vector_text_coords("Hello", font = 'gridfont_smooth') |> 
+vector_text_coords("Hello") |> 
   head()
 ```
 
 
 ```{r vector-matrix, fig.height = 3}
-vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
+vector_text_matrix("Hello", scale = 1) 
 ```
 
 
 ```{r vector-raster, fig.height = 3}
-vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
+vector_text_raster("Hello\n#RStats!", scale = 5) |>
   plot(interpolate = FALSE)
 ```
 
@@ -204,7 +204,7 @@ When plotting with ggplot, draw path for the points-within-strokes-within-charac
 ```{r vector-bespoke, fig.height = 3}
 library(ggplot2)
 
-coords <- vector_text_coords("Hello", "gridfont_smooth")
+coords <- vector_text_coords("Hello")
 head(coords)
 
 ggplot(coords) +
@@ -304,7 +304,7 @@ oldpar <- par(mai = c(0, 0, 0, 0))
 lorem::ipsum(1) |>
   strwrap(60) |>
   paste(collapse = "\n") |>
-  vector_text_raster(font = 'gridfont_smooth') |>
+  vector_text_raster() |>
   plot(interpolate = FALSE)
 
 par(oldpar)
@@ -321,7 +321,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$bitmap)) {
+for (font_name in get_lofifont_names()$bitmap) {
   coords <- bitmap_text_coords(txt, font_name)
   
   p <- ggplot(coords) +
@@ -349,7 +349,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$vector)) {
+for (font_name in get_lofifont_names()$vector) {
   coords <- vector_text_coords(txt, font_name)
   
   p <- ggplot(coords) +

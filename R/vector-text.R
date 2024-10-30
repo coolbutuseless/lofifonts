@@ -35,7 +35,7 @@ globalVariables(c('x', 'xoffset', 'stroke_idx'))
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'arcade'), 
+vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
                                dx = 0L, dy = 0L, missing = utf8ToInt('?')) {
 
   
@@ -57,7 +57,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
       text <- tolower(text)
     }
     
-    lofifont <- vectors[[font]]
+    lofifont <- vector_fonts[[font]]
   }
   
   
@@ -114,7 +114,7 @@ line <- function(mat, x1, y1,  x2,  y2) {
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_matrix <- function(text, font = c('gridfont', 'gridfont_smooth', 'arcade'), 
+vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
                                scale = 1, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
@@ -168,7 +168,7 @@ vector_text_matrix <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_raster <- function(text, font = c('gridfont', 'gridfont_smooth', 'arcade'), 
+vector_text_raster <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
                                scale = 10, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
