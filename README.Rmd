@@ -102,7 +102,8 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 ## Included fonts
 
 ```{r}
-get_lofi_names('all')
+get_lofi_names('bitmap')
+get_lofi_names('vector')
 ```
 
 

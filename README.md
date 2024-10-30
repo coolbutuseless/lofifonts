@@ -83,8 +83,21 @@ remotes::install_github('coolbutuseless/lofifonts')
 ## Included fonts
 
 ``` r
-# font_names
+get_lofi_names('bitmap')
 ```
+
+    #>  [1] "spleen-12x24"  "spleen-16x32"  "spleen-32x64"  "spleen-5x8"   
+    #>  [5] "spleen-6x12"   "spleen-8x16"   "tamzen10x20b"  "tamzen10x20r" 
+    #>  [9] "tamzen5x9b"    "tamzen5x9r"    "tamzen6x12b"   "tamzen6x12r"  
+    #> [13] "tamzen7x13b"   "tamzen7x13r"   "tamzen7x14b"   "tamzen7x14r"  
+    #> [17] "tamzen8x15b"   "tamzen8x15r"   "tamzen8x16b"   "tamzen8x16r"  
+    #> [21] "unifont"       "unscii-8"      "unscii-8-thin"
+
+``` r
+get_lofi_names('vector')
+```
+
+    #> [1] "arcade"          "gridfont"        "gridfont_smooth"
 
 ## Bitmap font: Rendering text
 
