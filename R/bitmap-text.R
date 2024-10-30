@@ -95,7 +95,7 @@ assert_lofifont <- function(lofifont) {
      nrow(lofifont$coords) > 0
      
      is.atomic(lofifont$codepoint_to_idx)
-     length(lofifont$codepoint_to_idx > 0)
+     length(lofifont$codepoint_to_idx) > 0
      
      is.numeric(lofifont$default_codepoint)
      length(lofifont$default_codepoint) == 1
@@ -107,13 +107,23 @@ assert_lofifont <- function(lofifont) {
      all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofifont$glyph_info))
      nrow(lofifont$glyph_info) > 0
   })
+  TRUE
 }
 
-assert_lofi_vector <- function(lofifont) {
-  assert_lofi(lofifont)
+assert_vector_lofifont <- function(lofifont) {
+  assert_lofifont(lofifont)
   stopifnot(exprs = {
-    all(c("codepoint", "stroke_idx", "point_idx", "x", "y") %in% names(lofifont$coords))
+    all(c("stroke_idx", "point_idx", "x", "y") %in% names(lofifont$coords))
   })
+  TRUE
+}
+
+assert_bitmap_lofifont <- function(lofifont) {
+  assert_lofifont(lofifont)
+  stopifnot(exprs = {
+    all(c("x", "y") %in% names(lofifont$coords))
+  })
+  TRUE
 }
 
 
@@ -160,6 +170,7 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
   }
   
   if (inherits(font, 'lofifont')) {
+    assert_bitmap_lofifont(font)
     lofifont <- font
   } else {
     lofifont <- bitmaps[[font]]

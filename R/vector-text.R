@@ -47,6 +47,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   }
   
   if (inherits(font, 'lofifont')) {
+    assert_vector_lofifont(font)
     lofifont <- font 
   } else {
     font <- match.arg(font)

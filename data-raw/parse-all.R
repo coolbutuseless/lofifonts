@@ -62,7 +62,7 @@ compact_bitmap <- function(font) {
   coords <- coords[, c('x', 'y')]
   
   glyph_info <- data.frame(
-    codepoints = which(!is.na(font$idx)) - 1L,
+    codepoint  = which(!is.na(font$idx)) - 1L,
     npoints    = lens,
     row_start  = row_starts,
     row_end    = row_ends,
