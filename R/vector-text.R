@@ -16,7 +16,6 @@ globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
 #' @param dy Additional character spacing in the vertical direction. Default: 0
 #' @param missing Codepoint to use if glyph not available in font. default: Codepoint
 #'        for '?'
-#' @param line_height line height
 #'
 #' @return data.frame of stroke information
 #' \describe{
@@ -38,7 +37,7 @@ globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'arcade'), 
-                               dx = 0, dy = 0, missing = utf8ToInt('?'), line_height = NULL) {
+                               dx = 0L, dy = 0L, missing = utf8ToInt('?')) {
 
   
   stopifnot(length(text) == 1)
@@ -95,6 +94,9 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   res <- vector$coords[row_idxs, ]
   
+  # adjust widths if requested
+  widths <- widths + as.integer(dx)
+  
   # xoffset needs to reset to 0 after every linebreak
   xoffset <- integer(0)
   linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
@@ -106,7 +108,6 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
       xoffset <- c(xoffset, 0L, this_offset)
     }
   }
-  xoffset
   res$xoffset <- rep.int(xoffset, lens)
   
   
@@ -116,8 +117,8 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- line_height %||% vector$line_height
-  res$y <- res$y + (max(res$line) - res$line) * line_height
+  line_height <- vector$line_height %||% (max(res$y0) + 1L)
+  res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
   
   res$x <- res$x + res$xoffset
   

@@ -10,9 +10,9 @@
 #'   \item{"unifomt" (the default)}
 #'   \item{unscii: "unscii-8", "unscii-8-thin"}
 #' }
-#' @param line_height Integer value for the vertical distance between multiple lines
-#'        of text.  Use this to override the font's lineheight.
-#'        Default: NULL means to use the font's built-in lineheight.
+#' 
+#' @param dx Additional character spacing in the horizontal direction. Default: 0
+#' @param dy Additional character spacing in the vertical direction. Default: 0
 #' @param missing Codepoint (integer) to use if glyph not found in font. 
 #'        Default: NULL means to use the default specified by the font internally.
 #'        Otherwise it will default to the codepoint for '?'
@@ -32,7 +32,7 @@
 #' @family bitmap text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missing = NULL) {
+bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing = NULL) {
   
   stopifnot(length(text) == 1)
   
@@ -78,6 +78,9 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   
   res <- bitmap$coords[row_idxs, ]
   
+  # adjust widths if requested
+  widths <- widths + as.integer(dx)
+  
   # xoffset needs to reset to 0 after every linebreak
   xoffset <- integer(0)
   linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
@@ -99,8 +102,8 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- line_height %||% bitmap$line_height
-  res$y <- res$y + (max(res$line) - res$line) * line_height
+  line_height <- bitmap$line_height %||% (max(res$y0) + 1L)
+  res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
   
   res$x <- res$x + res$xoffset
   
@@ -170,7 +173,7 @@ coords_to_mat <- function(df) {
 #' @family bitmap text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale = 1,
+bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1,
                                missing = NULL) {
   
   stopifnot(length(text) == 1)
@@ -178,7 +181,7 @@ bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale
   scale <- as.integer(scale)
   stopifnot(scale >= 1)
   
-  df <- bitmap_text_coords(text, font, line_height = line_height, missing = missing)
+  df <- bitmap_text_coords(text, font, dx = dx, dy = dy, missing = missing)
   mat <- coords_to_mat(df)  
   
   if (scale > 1) {
@@ -203,11 +206,11 @@ bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale
 #' @importFrom grDevices as.raster
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_raster <- function(text, font = "unifont", line_height = NULL, scale = 1, 
+bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1, 
                                missing = NULL) {
   stopifnot(length(text) == 1)
   
-  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, line_height = line_height,
+  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy,
                             missing = missing)
   mat <- 1L - mat
   grDevices::as.raster(mat)

@@ -4,7 +4,7 @@
 \alias{bitmap_text_coords}
 \title{Create a data.frame of pixel coordinate information of the rendered text}
 \usage{
-bitmap_text_coords(text, font = "unifont", line_height = NULL, missing = NULL)
+bitmap_text_coords(text, font = "unifont", dx = 0L, dy = 0L, missing = NULL)
 }
 \arguments{
 \item{text}{Single text string. Can include carriage returns.}
@@ -17,9 +17,9 @@ bitmap_text_coords(text, font = "unifont", line_height = NULL, missing = NULL)
   \item{unscii: "unscii-8", "unscii-8-thin"}
 }}
 
-\item{line_height}{Integer value for the vertical distance between multiple lines
-of text.  Use this to override the font's lineheight.
-Default: NULL means to use the font's built-in lineheight.}
+\item{dx}{Additional character spacing in the horizontal direction. Default: 0}
+
+\item{dy}{Additional character spacing in the vertical direction. Default: 0}
 
 \item{missing}{Codepoint (integer) to use if glyph not found in font. 
 Default: NULL means to use the default specified by the font internally.

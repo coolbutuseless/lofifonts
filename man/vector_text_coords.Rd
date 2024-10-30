@@ -7,10 +7,9 @@
 vector_text_coords(
   text,
   font = c("gridfont", "gridfont_smooth", "arcade"),
-  dx = 0,
-  dy = 0,
-  missing = utf8ToInt("?"),
-  line_height = NULL
+  dx = 0L,
+  dy = 0L,
+  missing = utf8ToInt("?")
 )
 }
 \arguments{
@@ -25,8 +24,6 @@ vector_text_coords(
 
 \item{missing}{Codepoint to use if glyph not available in font. default: Codepoint
 for '?'}
-
-\item{line_height}{line height}
 }
 \value{
 data.frame of stroke information

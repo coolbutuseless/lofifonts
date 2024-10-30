@@ -7,7 +7,8 @@
 bitmap_text_raster(
   text,
   font = "unifont",
-  line_height = NULL,
+  dx = 0L,
+  dy = 0L,
   scale = 1,
   missing = NULL
 )
@@ -23,9 +24,9 @@ bitmap_text_raster(
   \item{unscii: "unscii-8", "unscii-8-thin"}
 }}
 
-\item{line_height}{Integer value for the vertical distance between multiple lines
-of text.  Use this to override the font's lineheight.
-Default: NULL means to use the font's built-in lineheight.}
+\item{dx}{Additional character spacing in the horizontal direction. Default: 0}
+
+\item{dy}{Additional character spacing in the vertical direction. Default: 0}
 
 \item{scale}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 Scale up the matrix or raster result by this factor}
