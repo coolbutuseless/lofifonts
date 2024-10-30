@@ -134,6 +134,7 @@ vector_font_compact <- function(font) {
   )
   row.names(glyph_info) <- NULL
   
+  font$codepoint <- NULL
   
   res <- list(
     coords            = font,
