@@ -22,7 +22,7 @@ library(lofifonts)
 ## Bitmap font: included fonts
 
 ```{r}
-get_lofifont_names()$bitmap
+get_lofi_names('bitmap')
 ```
 
 | Type   | Name            | Sizes                         | Unicode?              | # glyphs |
