@@ -13,17 +13,21 @@ vector_text_coords(
 )
 }
 \arguments{
-\item{text}{Single text string. Can include carriage returns.}
+\item{text}{Single text string. Can include carriage returns to split text 
+over multiple lines.}
 
-\item{font}{Name of vector font. One of 
-\code{c("arcade", "gridfont", "gridfont_smooth")}}
+\item{font}{Name of vector font, or a vector 'lofi' font object.  Default: 'gridfont_smooth'.
+Use \code{get_lofi_names('vector')} to retrieve a list of all valid
+vector fonts included in this package.}
 
 \item{dx}{Additional character spacing in the horizontal direction. Default: 0}
 
-\item{dy}{Additional character spacing in the vertical direction. Default: 0}
+\item{dy}{Additional character spacing in the vertical direction i.e. between 
+rows of text. Default: 0}
 
-\item{missing}{Codepoint to use if glyph not available in font. default: Codepoint
-for '?'}
+\item{missing}{Codepoint to use if glyph not found in font. 
+Default: NULL means to use the default specified by the font internally.
+Otherwise it will default to the codepoint for '?'}
 }
 \value{
 data.frame of stroke information
@@ -33,11 +37,9 @@ data.frame of stroke information
   \item{\code{stroke_idx}}{Index of the stroke within each character}
   \item{\code{x}}{Pixel coordinate x value for display}
   \item{\code{y}}{Pixel coordinate y value for display}
-  \item{\code{width}}{Width of vector character}
-  \item{\code{height}}{Height of vector character}
+  \item{\code{line}}{Line number within input \code{text} where this character appears}
   \item{\code{x0}}{Original untransformed x-coordinate}
   \item{\code{y0}}{Original untransformed y-coordinate}
-  \item{\code{line}}{Line number within input \code{text} where this character appears}
 }
 }
 \description{

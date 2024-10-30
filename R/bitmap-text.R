@@ -131,24 +131,22 @@ assert_lofi_bitmap <- function(lofi) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Create a data.frame of pixel coordinate information of the rendered text
 #'
-#' @param text Single text string. Can include carriage returns.
-#' @param font Name of bitmap font. One of the following:
-#' \itemize{
-#'   \item{spleen: "spleen-12x24", "spleen-16x32", "spleen-32x64", "spleen-5x8", "spleen-6x12", "spleen-8x16"}
-#'   \item{tamzen: "Tamzen10x20b", "Tamzen10x20r", "Tamzen5x9b", "Tamzen5x9r", "Tamzen6x12b", "Tamzen6x12r", "Tamzen7x13b", "Tamzen7x13r", "Tamzen7x14b", "Tamzen7x14r", "Tamzen8x15b", "Tamzen8x15r", "Tamzen8x16b", "Tamzen8x16r"}
-#'   \item{"unifomt" (the default)}
-#'   \item{unscii: "unscii-8", "unscii-8-thin"}
-#' }
-#' 
+#' @param text Single text string. Can include carriage returns to split text 
+#'        over multiple lines.
+#' @param font Name of bitmap font, or a 'lofi' font object.  Default: 'unifont'.
+#'   Use \code{get_lofi_names('bitmap')} to retrieve a list of all valid
+#'   bitmap fonts included in this package.  To create a 'lofi' font object
+#'   use \code{\link{convert_bm_font_to_lofi}()}
 #' @param dx Additional character spacing in the horizontal direction. Default: 0
-#' @param dy Additional character spacing in the vertical direction. Default: 0
-#' @param missing Codepoint (integer) to use if glyph not found in font. 
+#' @param dy Additional character spacing in the vertical direction i.e. between 
+#'        rows of text. Default: 0
+#' @param missing Codepoint to use if glyph not found in font. 
 #'        Default: NULL means to use the default specified by the font internally.
 #'        Otherwise it will default to the codepoint for '?'
 #'
 #' @return data.frame of coordinate information
 #' \describe{
-#'   \item{\code{char_idx}}{The index of the character within the provided \code{text} string}
+#'   \item{\code{char_idx}}{The index of the glyph within the provided \code{text} string}
 #'   \item{\code{codepoint}}{Unicode codepoint (integer)}
 #'   \item{\code{x}}{Pixel coordinate x value for display}
 #'   \item{\code{y}}{Pixel coordinate y value for display}
@@ -191,9 +189,7 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
 #' Convert a data.frame of (x,y) coords into a matrix
 #'
 #' @param df data.frame with x and y coords
-#'
 #' @return matrix to hold the coords
-#'
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 coords_to_mat <- function(df) {

@@ -9,13 +9,11 @@ globalVariables(c('x', 'xoffset', 'stroke_idx'))
 #'
 #' Text input can contain multiple lines separated by carriage returns
 #'
-#' @param text Single text string. Can include carriage returns.
-#' @param font Name of vector font. One of 
-#' \code{c("arcade", "gridfont", "gridfont_smooth")}
-#' @param dx Additional character spacing in the horizontal direction. Default: 0
-#' @param dy Additional character spacing in the vertical direction. Default: 0
-#' @param missing Codepoint to use if glyph not available in font. default: Codepoint
-#'        for '?'
+#' @inheritParams bitmap_text_coords
+#' 
+#' @param font Name of vector font, or a vector 'lofi' font object.  Default: 'gridfont_smooth'.
+#'   Use \code{get_lofi_names('vector')} to retrieve a list of all valid
+#'   vector fonts included in this package.  
 #'
 #' @return data.frame of stroke information
 #' \describe{
@@ -24,11 +22,9 @@ globalVariables(c('x', 'xoffset', 'stroke_idx'))
 #'   \item{\code{stroke_idx}}{Index of the stroke within each character}
 #'   \item{\code{x}}{Pixel coordinate x value for display}
 #'   \item{\code{y}}{Pixel coordinate y value for display}
-#'   \item{\code{width}}{Width of vector character}
-#'   \item{\code{height}}{Height of vector character}
+#'   \item{\code{line}}{Line number within input \code{text} where this character appears}
 #'   \item{\code{x0}}{Original untransformed x-coordinate}
 #'   \item{\code{y0}}{Original untransformed y-coordinate}
-#'   \item{\code{line}}{Line number within input \code{text} where this character appears}
 #' }
 #' @examples
 #' vector_text_coords('Hi')
