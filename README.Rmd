@@ -49,13 +49,13 @@ This package will render text with a specified bitmap or vector font to:
 ### What's in the box
 
 * Bitmap font functions
-    * `bitmap_text_coords()` returns a data.frame of pixel locations
-    * `bitmap_text_matrix()` returns a binary matrix with pixel locations set to 1
-    * `bitmap_text_raster()` returns a raster image of the text
+    * `bitmap_text_coords()` create a data.frame of pixel locations
+    * `bitmap_text_matrix()` create a binary matrix with pixel locations set to 1
+    * `bitmap_text_raster()` create a raster image of the text
 * Vector font functions
-    * `vector_text_coords()` returns a data.frame of strokes
-    * `vector_text_matrix()` returns a binary matrix with pixel locations set to 1
-    * `vector_text_raster()` returns a raster image of the text
+    * `vector_text_coords()` create a data.frame of strokes
+    * `vector_text_matrix()` create a binary matrix with pixel locations set to 1
+    * `vector_text_raster()` create a raster image of the text
 
 ### Fonts
 
@@ -196,7 +196,7 @@ vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
 This is an example of bespoke rendering of the strokes for an example string.
 
 For each character (`char_idx`) there are 1-or-more strokes (`stroke`).  Each stroke
-has at least 2 points (indicated by `idx`).
+has has 2 or more rows giving the path for this particular stroke.
 
 When plotting with ggplot, draw path for the points-within-strokes-within-characters.
 
@@ -250,6 +250,31 @@ ggplot(coords) +
   coord_equal() + 
   theme(legend.position = 'none')
 ```
+
+
+## Rendering with `{bittermelon}` fonts
+
+[`bittermelon`](https://cran.r-project.org/package=bittermelon) is a package
+which supports reading and manipulating many different types of bitmap font.
+
+To use a font loaded with `bittermelon` is must first be convert to the 
+`lofifont` format which this package understands.
+
+```{r}
+# Load font using "bittermelon"
+filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
+bmfont <- bittermelon::read_yaff(filename)
+
+# Convert to lofifont format
+lofi <- convert_bm_font_to_lofi(bmfont)
+lofi
+
+# Layout the text and render to a raster
+bitmap_text_raster('hello', font = lofi) |>
+  plot(interpolate = FALSE)
+```
+
+
 
 
 ## Large block of text in bitmap font

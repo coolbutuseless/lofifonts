@@ -113,7 +113,7 @@ assert_lofifont <- function(lofifont) {
 assert_vector_lofifont <- function(lofifont) {
   assert_lofifont(lofifont)
   stopifnot(exprs = {
-    all(c("stroke_idx", "point_idx", "x", "y") %in% names(lofifont$coords))
+    all(c("stroke_idx", "x", "y") %in% names(lofifont$coords))
   })
   TRUE
 }

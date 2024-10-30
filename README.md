@@ -240,20 +240,13 @@ vector_text_coords("Hello", font = 'gridfont_smooth') |>
   head()
 ```
 
-    #>     char_idx codepoint stroke_idx point_idx         x        y line        x0
-    #> 494        1       104          1         1 0.0000000 9.000000    0 0.0000000
-    #> 495        1       104          1         2 0.0000000 3.000000    0 0.0000000
-    #> 496        1       104          2         1 0.0000000 5.666667    0 0.0000000
-    #> 497        1       104          2         2 0.1666667 6.333333    0 0.1666667
-    #> 498        1       104          2         3 0.6666667 6.833333    0 0.6666667
-    #> 499        1       104          2         4 1.1666667 7.000000    0 1.1666667
-    #>           y0
-    #> 494 9.000000
-    #> 495 3.000000
-    #> 496 5.666667
-    #> 497 6.333333
-    #> 498 6.833333
-    #> 499 7.000000
+    #>     char_idx codepoint stroke_idx         x        y line        x0       y0
+    #> 494        1       104          1 0.0000000 9.000000    0 0.0000000 9.000000
+    #> 495        1       104          1 0.0000000 3.000000    0 0.0000000 3.000000
+    #> 496        1       104          2 0.0000000 5.666667    0 0.0000000 5.666667
+    #> 497        1       104          2 0.1666667 6.333333    0 0.1666667 6.333333
+    #> 498        1       104          2 0.6666667 6.833333    0 0.6666667 6.833333
+    #> 499        1       104          2 1.1666667 7.000000    0 1.1666667 7.000000
 
 ``` r
 vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
@@ -307,15 +300,15 @@ coords <- vector_text_coords("Hello", "gridfont_smooth")
 head(coords)
 ```
 
-    #> # A tibble: 6 × 9
-    #>   char_idx codepoint stroke_idx point_idx     x     y  line    x0    y0
-    #>      <int>     <int>      <int>     <int> <dbl> <dbl> <int> <dbl> <dbl>
-    #> 1        1       104          1         1 0      9        0 0      9   
-    #> 2        1       104          1         2 0      3        0 0      3   
-    #> 3        1       104          2         1 0      5.67     0 0      5.67
-    #> 4        1       104          2         2 0.167  6.33     0 0.167  6.33
-    #> 5        1       104          2         3 0.667  6.83     0 0.667  6.83
-    #> 6        1       104          2         4 1.17   7        0 1.17   7
+    #> # A tibble: 6 × 8
+    #>   char_idx codepoint stroke_idx     x     y  line    x0    y0
+    #>      <int>     <int>      <int> <dbl> <dbl> <int> <dbl> <dbl>
+    #> 1        1       104          1 0      9        0 0      9   
+    #> 2        1       104          1 0      3        0 0      3   
+    #> 3        1       104          2 0      5.67     0 0      5.67
+    #> 4        1       104          2 0.167  6.33     0 0.167  6.33
+    #> 5        1       104          2 0.667  6.83     0 0.667  6.83
+    #> 6        1       104          2 1.17   7        0 1.17   7
 
 ``` r
 ggplot(coords) +
@@ -364,6 +357,39 @@ ggplot(coords) +
 
 <img src="man/figures/README-unicode2-1.png" width="100%" />
 
+## Rendering with `{bittermelon}` fonts
+
+[`bittermelon`](https://cran.r-project.org/package=bittermelon) is a
+package which supports readind and manipulating many different types of
+bitmap font.
+
+To use a font loaded with `bittermelon` is must first be convert to the
+`lofifont` format which this package understands.
+
+``` r
+# Load font using "bittermelon"
+filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
+bmfont <- bittermelon::read_yaff(filename)
+
+# Convert to lofifont format
+lofi <- convert_bm_font_to_lofi(bmfont)
+lofi
+```
+
+    #> [lofi font]
+    #>   codepoints :  919 
+    #>   num coords :  7558 
+    #>   width      :  4 4 4 (min/median/max)
+    #>   line height:  6
+
+``` r
+# Layout the text and render to a raster
+bitmap_text_raster('hello', font = lofi) |>
+  plot(interpolate = FALSE)
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
 ## Large block of text in bitmap font
 
 ``` r
@@ -378,7 +404,7 @@ lorem::ipsum(2) |>
   plot()
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
 ``` r
 par(oldpar)
@@ -398,7 +424,7 @@ lorem::ipsum(1) |>
   plot(interpolate = FALSE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 ``` r
 par(oldpar)

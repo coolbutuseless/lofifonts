@@ -131,8 +131,8 @@ if (FALSE) {
   filename <- system.file("fonts/spleen/spleen-8x16.hex.gz", package = "bittermelon")
   bmfont <- bittermelon::read_hex(filename)
   
-  # filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
-  # bmfont <- bittermelon::read_hex(filename)
+  filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
+  bmfont <- bittermelon::read_yaff(filename)
   
   lofi <- convert_bm_font_to_lofi(bmfont)
   lofi

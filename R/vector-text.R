@@ -1,5 +1,5 @@
 
-globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
+globalVariables(c('x', 'xoffset', 'stroke_idx'))
 
 
 
@@ -22,7 +22,6 @@ globalVariables(c('x', 'xoffset', 'stroke_idx', 'point_idx'))
 #'   \item{\code{char_idx}}{The index of the character within the provided \code{text} string}
 #'   \item{\code{codepoint}}{Unicode codepoint (integer)}
 #'   \item{\code{stroke_idx}}{Index of the stroke within each character}
-#'   \item{\code{point_idx}}{Index of the point within each stroke}
 #'   \item{\code{x}}{Pixel coordinate x value for display}
 #'   \item{\code{y}}{Pixel coordinate y value for display}
 #'   \item{\code{width}}{Width of vector character}
@@ -69,7 +68,7 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
   
   res <- lofi_text_coords(text, lofifont = lofifont, dx = dx, dy = dy, missing = missing)
   
-  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'point_idx', 'x', 'y', 'line', 'x0', 'y0')]
+  res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
   res
 }

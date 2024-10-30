@@ -31,7 +31,6 @@ data.frame of stroke information
   \item{\code{char_idx}}{The index of the character within the provided \code{text} string}
   \item{\code{codepoint}}{Unicode codepoint (integer)}
   \item{\code{stroke_idx}}{Index of the stroke within each character}
-  \item{\code{point_idx}}{Index of the point within each stroke}
   \item{\code{x}}{Pixel coordinate x value for display}
   \item{\code{y}}{Pixel coordinate y value for display}
   \item{\code{width}}{Width of vector character}
