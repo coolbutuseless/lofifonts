@@ -25,7 +25,8 @@ get_lofi_names <- function(type) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Fetch an included 'lofi' font
 #' @param font_name Name of font e.g. 'unifont'
-#' @return 'lofi' font object
+#' @return 'lofi' font object. See \code{\link{lofi}} for details of this
+#'         data structure
 #' @examples
 #' get_lofi_font('unifont')
 #' @export

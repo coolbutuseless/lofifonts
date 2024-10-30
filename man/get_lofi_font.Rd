@@ -10,7 +10,8 @@ get_lofi_font(font_name)
 \item{font_name}{Name of font e.g. 'unifont'}
 }
 \value{
-'lofi' font object
+'lofi' font object. See \code{\link{lofi}} for details of this
+        data structure
 }
 \description{
 Fetch an included 'lofi' font
