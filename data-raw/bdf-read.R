@@ -81,6 +81,14 @@ read_bdf <- function(filename, codepoint_from_startchar = FALSE) {
   # altogether for now
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   encodings <- vapply(chars, function(x) x$encoding, integer(1))
+  
+  # Fonts may have duplicate encodings: e.g. Tamzen.  Remove the dupes.
+  dupes <- which(duplicated(encodings))
+  if (length(dupes) > 0) {
+    chars <- chars[-dupes]
+    encodings <- encodings[-dupes]
+  }
+  
   # print(encodings)
   good      <- encodings >= 0
   chars     <- chars[good]

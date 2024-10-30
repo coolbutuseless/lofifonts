@@ -1,49 +1,21 @@
 
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Create a data.frame of pixel coordinate information of the rendered text
-#'
-#' @param text Single text string. Can include carriage returns.
-#' @param font Name of bitmap font. One of the following:
-#' \itemize{
-#'   \item{spleen: "spleen-12x24", "spleen-16x32", "spleen-32x64", "spleen-5x8", "spleen-6x12", "spleen-8x16"}
-#'   \item{tamzen: "Tamzen10x20b", "Tamzen10x20r", "Tamzen5x9b", "Tamzen5x9r", "Tamzen6x12b", "Tamzen6x12r", "Tamzen7x13b", "Tamzen7x13r", "Tamzen7x14b", "Tamzen7x14r", "Tamzen8x15b", "Tamzen8x15r", "Tamzen8x16b", "Tamzen8x16r"}
-#'   \item{"unifomt" (the default)}
-#'   \item{unscii: "unscii-8", "unscii-8-thin"}
-#' }
-#' @param line_height Integer value for the vertical distance between multiple lines
-#'        of text.  Use this to override the font's lineheight.
-#'        Default: NULL means to use the font's built-in lineheight.
-#' @param missing Codepoint (integer) to use if glyph not found in font. 
-#'        Default: NULL means to use the default specified by the font internally.
-#'        Otherwise it will default to the codepoint for '?'
-#'
-#' @return data.frame of coordinate information
-#' \describe{
-#'   \item{\code{char_idx}}{The index of the character within the provided \code{text} string}
-#'   \item{\code{codepoint}}{Unicode codepoint (integer)}
-#'   \item{\code{x}}{Pixel coordinate x value for display}
-#'   \item{\code{y}}{Pixel coordinate y value for display}
-#'   \item{\code{line}}{Line number within input \code{text} where this character appears}
-#'   \item{\code{x0}}{Original untransformed x-coordinate}
-#'   \item{\code{y0}}{Original untransformed y-coordinate}
-#' }
-#' @examples
-#' bitmap_text_coords('Hi')
-#' @family bitmap text functions
-#' @export
+#' Common funtion for extracting data.frames from a lofi font
+#' This works with both bitmap and vector fonts
+#' 
+#' @param text string
+#' @param lofi lofi font object
+#' @param dx,dy extra spacing offsets for each character
+#' @param missing which character to use if any codepoint is not available in 
+#'        this font
+#' @return data.frame of coordinates/lines for this text
+#' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missing = NULL) {
+lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   
-  stopifnot(length(text) == 1)
-  
-  if (nchar(text) == 0) {
-    return(data.frame())
-  }
-  
-  bitmap <- bitmaps[[font]]
-  if (is.null(bitmap)) {
-    stop("No such bitmap font: ", font)
-  }
+  stopifnot(inherits(lofi, 'lofi'))
   
   codepoints <- utf8ToInt(text)
   
@@ -53,25 +25,36 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   codepoints <- codepoints[!is_cr]
   linebreak  <- c(which(diff(line) > 0), length(codepoints))
   
-  idxs <- bitmap$codepoint_to_idx[codepoints + 1L]
+  idxs <- lofi$codepoint_to_idx[codepoints + 1L]
   
-  # Determine what char should be used for missing
-  if (is.character(missing)) {
-    missing <- utf8ToInt(missing)[[1]]
+  if (anyNA(idxs)) {
+    # Determine what char should be used for missing
+    missing <- missing %||% lofi$default_codepoint %||% utf8ToInt('?')
+    if (is.character(missing)) {
+      missing <- utf8ToInt(missing)[[1]]
+    }
+    
+    if (!missing %in% lofi$glyph_info$codepoint) {
+      stop("Codepoint for missing glyphs is not part of this font! Codepoint = ", missing)  
+    }
+    
+    idxs[is.na(idxs)] <- missing
   }
-  missing <- missing %||% bitmap$font_info$default_char %||% utf8ToInt('?')
   
-  idxs[is.na(idxs)] <- missing
   
-  starts <- bitmap$row_start[idxs]
-  ends   <- bitmap$row_end  [idxs]
-  widths <- bitmap$width    [idxs]
-  lens   <- bitmap$npoints  [idxs]
+  glyphs <- lofi$glyph_info[idxs, , drop = FALSE]
+  starts <- glyphs$row_start
+  ends   <- glyphs$row_end  
+  widths <- glyphs$width    
+  lens   <- glyphs$npoints  
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
-  res <- bitmap$coords[row_idxs, ]
+  res <- lofi$coords[row_idxs, ]
+  
+  # adjust widths if requested
+  widths <- widths + as.integer(dx)
   
   # xoffset needs to reset to 0 after every linebreak
   xoffset <- integer(0)
@@ -80,7 +63,7 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
     if (linestart[i] == linebreak[i]) {
       xoffset <- c(xoffset, 0L)
     } else {
-      this_offset <- cumsum(widths[seq(linestart[i] + 1, linebreak[i])])
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
       xoffset <- c(xoffset, 0L, this_offset)
     }
   }
@@ -94,10 +77,107 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
   res$y0        <- res$y
   res$line      <- rep.int(line, lens)
   
-  line_height <- line_height %||% bitmap$font_info$line_height
-  res$y <- res$y + (max(res$line) - res$line) * line_height
+  line_height <- lofi$line_height %||% (max(res$y0) + 1L)
+  res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
   
   res$x <- res$x + res$xoffset
+  
+  res
+}
+
+
+assert_lofi <- function(lofi) {
+  stopifnot(exprs = {
+    inherits(lofi, 'lofi')
+     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofi))
+     
+     is.data.frame(lofi$coords)
+     nrow(lofi$coords) > 0
+     
+     is.atomic(lofi$codepoint_to_idx)
+     length(lofi$codepoint_to_idx) > 0
+     
+     is.numeric(lofi$default_codepoint)
+     length(lofi$default_codepoint) == 1
+     
+     is.numeric(lofi$line_height)
+     length(lofi$line_height) == 1
+     
+     is.data.frame(lofi$glyph_info)
+     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofi$glyph_info))
+     nrow(lofi$glyph_info) > 0
+  })
+  TRUE
+}
+
+assert_lofi_vector <- function(lofi) {
+  assert_lofi(lofi)
+  stopifnot(exprs = {
+    all(c("stroke_idx", "x", "y") %in% names(lofi$coords))
+  })
+  TRUE
+}
+
+assert_lofi_bitmap <- function(lofi) {
+  assert_lofi(lofi)
+  stopifnot(exprs = {
+    all(c("x", "y") %in% names(lofi$coords))
+  })
+  TRUE
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Create a data.frame of pixel coordinate information of the rendered text
+#'
+#' @param text Single text string. Can include carriage returns to split text 
+#'        over multiple lines.
+#' @param font Name of bitmap font, or a 'lofi' font object.  Default: 'unifont'.
+#'   Use \code{get_lofi_names('bitmap')} to retrieve a list of all valid
+#'   bitmap fonts included in this package.  To create a 'lofi' font object
+#'   use \code{\link{convert_bm_font_to_lofi}()}
+#' @param dx Additional character spacing in the horizontal direction. Default: 0
+#' @param dy Additional character spacing in the vertical direction i.e. between 
+#'        rows of text. Default: 0
+#' @param missing Codepoint to use if glyph not found in font. 
+#'        Default: NULL means to use the default specified by the font internally.
+#'        Otherwise it will default to the codepoint for '?'
+#'
+#' @return data.frame of coordinate information
+#' \describe{
+#'   \item{\code{char_idx}}{The index of the glyph within the provided \code{text} string}
+#'   \item{\code{codepoint}}{Unicode codepoint (integer)}
+#'   \item{\code{x}}{Pixel coordinate x value for display}
+#'   \item{\code{y}}{Pixel coordinate y value for display}
+#'   \item{\code{line}}{Line number within input \code{text} where this character appears}
+#'   \item{\code{x0}}{Original untransformed x-coordinate}
+#'   \item{\code{y0}}{Original untransformed y-coordinate}
+#' }
+#' @examples
+#' bitmap_text_coords('Hi')
+#' @family bitmap text functions
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing = NULL) {
+  
+  stopifnot(length(text) == 1)
+  
+  if (nchar(text) == 0) {
+    return(data.frame())
+  }
+  
+  if (inherits(font, 'lofi')) {
+    assert_lofi_bitmap(font)
+    lofi <- font
+  } else {
+    lofi <- bitmap_fonts[[font]]
+  }
+  if (is.null(lofi)) {
+    stop("No such bitmap font: ", font)
+  }
+  
+  res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
@@ -109,9 +189,7 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
 #' Convert a data.frame of (x,y) coords into a matrix
 #'
 #' @param df data.frame with x and y coords
-#'
 #' @return matrix to hold the coords
-#'
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 coords_to_mat <- function(df) {
@@ -165,7 +243,7 @@ coords_to_mat <- function(df) {
 #' @family bitmap text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale = 1,
+bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1,
                                missing = NULL) {
   
   stopifnot(length(text) == 1)
@@ -173,7 +251,7 @@ bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale
   scale <- as.integer(scale)
   stopifnot(scale >= 1)
   
-  df <- bitmap_text_coords(text, font, line_height = line_height, missing = missing)
+  df <- bitmap_text_coords(text, font, dx = dx, dy = dy, missing = missing)
   mat <- coords_to_mat(df)  
   
   if (scale > 1) {
@@ -198,11 +276,11 @@ bitmap_text_matrix <- function(text, font = "unifont", line_height = NULL, scale
 #' @importFrom grDevices as.raster
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_raster <- function(text, font = "unifont", line_height = NULL, scale = 1, 
+bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1, 
                                missing = NULL) {
   stopifnot(length(text) == 1)
   
-  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, line_height = line_height,
+  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy,
                             missing = missing)
   mat <- 1L - mat
   grDevices::as.raster(mat)

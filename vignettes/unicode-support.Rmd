@@ -62,25 +62,7 @@ will use `?`
 
 ## Lists of supported codepoints
 
-The unicode glyphs supported by each font are listed in the `font_info` data
-structure.
 
-```{r}
-# Cozette font - number of codepoints and a list of the first 200
-font_info$bitmap$`spleen-12x24`$codepoints |> 
-  length()
-
-font_info$bitmap$`spleen-12x24`$codepoints |> 
-  head(60)
-
-font_info$bitmap$`spleen-12x24`$codepoints |> 
-  head(60) |>
-  intToUtf8()
-
-# Arcade font - includes 66 codepoints
-font_info$vector$arcade$codepoints
-intToUtf8(font_info$vector$arcade$codepoints)
-```
 
 
 

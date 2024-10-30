@@ -49,13 +49,13 @@ This package will render text with a specified bitmap or vector font to:
 ### What's in the box
 
 * Bitmap font functions
-    * `bitmap_text_coords()` returns a data.frame of pixel locations
-    * `bitmap_text_matrix()` returns a binary matrix with pixel locations set to 1
-    * `bitmap_text_raster()` returns a raster image of the text
+    * `bitmap_text_coords()` create a data.frame of pixel locations
+    * `bitmap_text_matrix()` create a binary matrix with pixel locations set to 1
+    * `bitmap_text_raster()` create a raster image of the text
 * Vector font functions
-    * `vector_text_coords()` returns a data.frame of strokes
-    * `vector_text_matrix()` returns a binary matrix with pixel locations set to 1
-    * `vector_text_raster()` returns a raster image of the text
+    * `vector_text_coords()` create a data.frame of strokes
+    * `vector_text_matrix()` create a binary matrix with pixel locations set to 1
+    * `vector_text_raster()` create a raster image of the text
 
 ### Fonts
 
@@ -102,7 +102,7 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 ## Included fonts
 
 ```{r}
-font_names
+get_lofi_names('all')
 ```
 
 
@@ -175,18 +175,18 @@ Text may be rendered with a vector font to
 
 ```{r vector-coords, fig.height = 3}
 library(lofifonts)
-vector_text_coords("Hello", font = 'gridfont_smooth') |> 
+vector_text_coords("Hello") |> 
   head()
 ```
 
 
 ```{r vector-matrix, fig.height = 3}
-vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
+vector_text_matrix("Hello", scale = 1) 
 ```
 
 
 ```{r vector-raster, fig.height = 3}
-vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
+vector_text_raster("Hello\n#RStats!", scale = 5) |>
   plot(interpolate = FALSE)
 ```
 
@@ -196,7 +196,7 @@ vector_text_raster("Hello\n#RStats!", "gridfont_smooth", scale = 5) |>
 This is an example of bespoke rendering of the strokes for an example string.
 
 For each character (`char_idx`) there are 1-or-more strokes (`stroke`).  Each stroke
-has at least 2 points (indicated by `idx`).
+has has 2 or more rows giving the path for this particular stroke.
 
 When plotting with ggplot, draw path for the points-within-strokes-within-characters.
 
@@ -204,7 +204,7 @@ When plotting with ggplot, draw path for the points-within-strokes-within-charac
 ```{r vector-bespoke, fig.height = 3}
 library(ggplot2)
 
-coords <- vector_text_coords("Hello", "gridfont_smooth")
+coords <- vector_text_coords("Hello")
 head(coords)
 
 ggplot(coords) +
@@ -252,6 +252,65 @@ ggplot(coords) +
 ```
 
 
+## Rendering with `{bittermelon}` fonts
+
+[`bittermelon`](https://cran.r-project.org/package=bittermelon) is a package
+which supports reading and manipulating many different types of bitmap font.
+
+To use a font loaded with `bittermelon` is must first be convert to the 
+`lofi` format which this package understands.
+
+```{r}
+# Load font using "bittermelon"
+filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
+bmfont <- bittermelon::read_yaff(filename)
+
+# Convert to lofi format
+lofi <- convert_bm_font_to_lofi(bmfont)
+lofi
+
+# Layout the text and render to a raster
+bitmap_text_raster('hello', font = lofi) |>
+  plot(interpolate = FALSE)
+```
+
+
+
+
+## Large block of text in bitmap font
+
+```{r}
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(2) |>
+  strwrap(40) |>
+  paste(collapse = "\n") |>
+  bitmap_text_raster() |>
+  plot()
+
+par(oldpar)
+```
+
+
+## Large block of text in vector font
+
+```{r fig.width = 21, fig.height = 6}
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(1) |>
+  strwrap(60) |>
+  paste(collapse = "\n") |>
+  vector_text_raster() |>
+  plot(interpolate = FALSE)
+
+par(oldpar)
+```
+
+
 
 ## Bitmap Fonts: Font Sheets
 
@@ -262,7 +321,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$bitmap)) {
+for (font_name in get_lofi_names('bitmap')) {
   coords <- bitmap_text_coords(txt, font_name)
   
   p <- ggplot(coords) +
@@ -290,7 +349,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$vector)) {
+for (font_name in get_lofi_names('vector')) {
   coords <- vector_text_coords(txt, font_name)
   
   p <- ggplot(coords) +

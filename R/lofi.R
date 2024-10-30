@@ -1,0 +1,79 @@
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' A description of the 'lofi' font format used to store fonts for this package
+#'
+#' This package uses a custom data structure to store font information.  This
+#' data structure is optimized for access to random sequences of glyphs which
+#' can be quickly assembled into a data.frame of points (for bitmap fonts) 
+#' or strokes (for vector fonts).
+#' This data structure also needs to be compact and avoid unnecessary
+#' repetition.  This is because the 'unifont' font contains pixel coordinates 
+#' for over 100,000 
+#' codepoints and all this data must not exceed package size limitations for CRAN.
+#'
+#' @name lofi
+#' @details
+#'
+#' Each 'lofi' font is a list object with the following members:
+#'
+#' \describe{
+#'   \item{coords}{A data frame of 'x', 'y' coordinates. For vector fonts 
+#'   this also includes a 'stroke_idx' to delineate the individual strokes
+#'   within a single glyph.  This is a simple concatenation of \emph{all}
+#'   points (or strokes) in a font.  Extracting this font data for a particular 
+#'   codepoint requires the use of other indexing elements in the 'lofi' structure}
+#'   \item{codepoint_to_idx}{An integer vector. Use a codepoint (integer) 
+#'   to access the row index into the 'glyph_info' data.frame which holds the
+#'   meta-information about this glyph. Because codepoints are indexed from 0, 
+#'   but R indexes vectors from 1, to access the row index: \code{codepoint_to_idx[codepoint + 1]}}
+#'   \item{line_height}{Integer. The line height of this font in pixels}
+#'   \item{default_codepoing}{Integer. The default unicode codepoint to use
+#'   if the font does not contain a given glyph}
+#'   \item{glyph_info}{A data.frame of meta-information about each glyph.  One
+#'   row per glyph}
+#'   \describe{
+#'     \item{codepoint}{Glyph codepoint (integer value)}
+#'     \item{npoints}{The number of rows of data in 'coords' data.frame which 
+#'     are used to define this font}
+#'     \item{row_start}{The index of the first row in 'coords' data.frame which
+#'     contains data for this font}
+#'     \item{row_end}{The index of the last row in 'coords' data.frame which
+#'     contains data for this font}
+#'     \item{width}{Glyph width (in pixels)}
+#'   }
+#' }
+#' 
+#' @section Usage: 
+#' 
+#' This section describes the process of extracting the data for a single
+#' glyph
+#' 
+#' \enumerate{
+#'   \item{Convert the glyph to an integer codepoint using \code{codepoint <- utf8ToInt(x)}}
+#'   \item{Use \code{row <- codepoint_to_idx[codepoint + 1]} to determine the row index of 
+#'   \code{glyph_info} which contains information for this codepoint.}
+#'   \item{if \code{row} is \code{NA} this indicates that the font does not support
+#'   the glyph, and the \code{row} corresponding to \code{default_codepoint} should
+#'   be used instead}
+#'   \item{\code{info <- glyph_info[row, ]}}
+#'   \item{Subset \code{coords} data.frame for the coordinates associated with 
+#'   this glyph:  \code{coords[info$row_start:info$row_end, ]}}
+#' }
+#' 
+#' @examples
+#' lifo <- get_lofi_font('unifont')
+#' x <- 'a'
+#' codepoint <- utf8ToInt(x)
+#' row <- lifo$codepoint_to_idx[codepoint + 1]
+#' info <- lifo$glyph_info[row,]
+#' coords <- lifo$coords[seq(info$row_start, info$row_end), ]
+#' coords
+#' plot(coords$x, coords$y, asp = 1, ann = FALSE, axes = FALSE)
+#' 
+#' # Regular users should just use the functions provided in this package which
+#' # add extra font information and layout sequences of characters 
+#' # over multiple lines
+#' bitmap_text_coords('a', 'unifont')
+#' bitmap_text_raster('a', 'unifont') |> plot(interpolate = FALSE)
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NULL

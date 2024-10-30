@@ -27,7 +27,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$vector)) {
+for (font_name in get_lofi_names('vector')) {
   coords <- vector_text_coords(txt, font_name)
   
   p <- ggplot(coords) +

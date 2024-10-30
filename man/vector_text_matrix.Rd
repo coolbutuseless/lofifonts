@@ -6,7 +6,7 @@
 \usage{
 vector_text_matrix(
   text,
-  font = c("gridfont", "gridfont_smooth", "arcade"),
+  font = c("gridfont_smooth", "gridfont", "arcade"),
   scale = 1,
   dx = NULL,
   dy = NULL,
@@ -14,20 +14,24 @@ vector_text_matrix(
 )
 }
 \arguments{
-\item{text}{Single text string. Can include carriage returns.}
+\item{text}{Single text string. Can include carriage returns to split text 
+over multiple lines.}
 
-\item{font}{Name of vector font. One of 
-\code{c("arcade", "gridfont", "gridfont_smooth")}}
+\item{font}{Name of vector font, or a vector 'lofi' font object.  Default: 'gridfont_smooth'.
+Use \code{get_lofi_names('vector')} to retrieve a list of all valid
+vector fonts included in this package.}
 
 \item{scale}{Scale factor for text rendering. Numeric value greater than zero.
 Default: 1}
 
 \item{dx}{Additional character spacing in the horizontal direction. Default: 0}
 
-\item{dy}{Additional character spacing in the vertical direction. Default: 0}
+\item{dy}{Additional character spacing in the vertical direction i.e. between 
+rows of text. Default: 0}
 
-\item{missing}{Codepoint to use if glyph not available in font. default: Codepoint
-for '?'}
+\item{missing}{Codepoint to use if glyph not found in font. 
+Default: NULL means to use the default specified by the font internally.
+Otherwise it will default to the codepoint for '?'}
 }
 \value{
 Binary matrix rendering of the font

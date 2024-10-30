@@ -50,7 +50,7 @@ compact_bitmap <- function(font) {
   coords <- do.call(rbind, dfs)
   
   row_ends    <- cumsum(lens)
-  row_starts  <- c(1, head(row_ends, -1) + 1)
+  row_starts  <- c(1L, head(row_ends, -1) + 1L)
   
   idx_to_rows <- mapply(seq.int, row_starts, row_ends, SIMPLIFY = FALSE)
   
@@ -61,22 +61,44 @@ compact_bitmap <- function(font) {
   
   coords <- coords[, c('x', 'y')]
   
-  list(
-    font_info        = font$font_info,
-    coords           = coords,
-    codepoint_to_idx = font$idx,
-    row_start        = row_starts,
-    row_end          = row_ends,
-    npoints          = lens,
-    width            = widths
+  glyph_info <- data.frame(
+    codepoint  = which(!is.na(font$idx)) - 1L,
+    npoints    = lens,
+    row_start  = row_starts,
+    row_end    = row_ends,
+    width      = widths
   )
+  row.names(glyph_info) <- NULL
+  
+  
+  default_char <- font$font_info$default_char
+  if (is.null(default_char)) {
+    default_char <- utf8ToInt('?')
+  }
+  if (is.character(default_char)) {
+    default_codepoint <- utf8ToInt(default_char)
+  } else {
+    default_codepoint <- as.integer(default_char)
+  }  
+  
+  class(coords) <- c('tbl_df', 'tbl', 'data.frame')
+  
+  res <- list(
+    coords            = coords,
+    codepoint_to_idx  = font$idx,
+    line_height       = font$font_info$line_height,
+    default_codepoint = default_codepoint,
+    glyph_info        = glyph_info
+  )
+  class(res) <- c('lofi', 'lofi-bitmap')
+  res
 }
 
 bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
   print(names(bitmaps1)[[i]])
   compact_bitmap(bitmaps1[[i]])
 })
-names(bitmaps2) <- names(bitmaps1)
+names(bitmaps2) <- tolower(names(bitmaps1))
 bitmaps <- bitmaps2
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,68 +124,88 @@ vector_font_compact <- function(font) {
   npoints <- rle(font$codepoint)$lengths
   npoints <- unname(npoints)
   
-  list(
-    font_info = list(line_height = height),
-    codepoints        = codepoints,
+  row_starts <- vapply(row_idx, min, integer(1))
+  row_ends   <- vapply(row_idx, max, integer(1))
+  
+  glyph_info <- data.frame(
+    codepoint = codepoints,
+    npoints   = npoints,
+    row_start = row_starts,
+    row_end   = row_ends,
+    width     = widths$width
+  )
+  row.names(glyph_info) <- NULL
+  
+  font$codepoint <- NULL
+  font$point_idx <- NULL
+  
+  class(font) <- c('tbl_df', 'tbl', 'data.frame')
+  
+  res <- list(
     coords            = font,
     codepoint_to_idx  = idx,
-    rows              = row_idx,
-    npoints           = npoints,
-    widths            = widths$width
+    line_height       = height,
+    default_codepoint = utf8ToInt('?'),
+    glyph_info        = glyph_info
   )
+  class(res) <- c('lofi', 'lofi-vector')
+  res
 }
 
-vectors <- list(
+vector_fonts <- list(
   arcade          = vector_font_compact(arcade),
   gridfont        = vector_font_compact(gridfont),
   gridfont_smooth = vector_font_compact(gridfont_smooth)
 )
 
 
+bitmap_fonts <- bitmaps
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save all the font data for internal use only
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 usethis::use_data(
-  bitmaps,
-  vectors,
+  bitmap_fonts,
+  vector_fonts,
   internal = TRUE, overwrite = TRUE, compress = 'bzip2'
 )
-file.size("R/sysdata.rda")/1024/1024
+# file.size("R/sysdata.rda")/1024/1024
 
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create the vectors of codepoints for each bitmap font
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bdf_names
-
-font_info <- list()
-font_info$bitmap <- lapply(bitmaps, function(bdf) {
-  cp <- which(!is.na(bdf$idx)) - 1L
-  list(codepoints = sort(cp))
-})
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract the codepoints from the vector fonts
-# Assemble all the font information
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-font_info$vector <- list()
-font_info$vector$arcade          <- list(codepoints = unique(arcade$codepoint))
-font_info$vector$gridfont        <- list(codepoints = unique(gridfont$codepoint))
-font_info$vector$gridfont_smooth <- list(codepoints = unique(gridfont_smooth$codepoint))
-
-font_names <- list(
-  bitmap = names(font_info$bitmap),
-  vector = names(font_info$vector)
-)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Save the font information for the user of the package
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-usethis::use_data(
-  font_info,
-  font_names,
-  internal = FALSE,
-  overwrite = TRUE
-)
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Create the vectors of codepoints for each bitmap font
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# bdf_names
+# 
+# font_info <- list()
+# font_info$bitmap <- lapply(bitmaps, function(bdf) {
+#   cp <- which(!is.na(bdf$idx)) - 1L
+#   list(codepoints = sort(cp))
+# })
+# 
+# 
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Extract the codepoints from the vector fonts
+# # Assemble all the font information
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# font_info$vector <- list()
+# font_info$vector$arcade          <- list(codepoints = unique(arcade$codepoint))
+# font_info$vector$gridfont        <- list(codepoints = unique(gridfont$codepoint))
+# font_info$vector$gridfont_smooth <- list(codepoints = unique(gridfont_smooth$codepoint))
+# 
+# font_names <- list(
+#   bitmap = names(font_info$bitmap),
+#   vector = names(font_info$vector)
+# )
+# 
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # Save the font information for the user of the package
+# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# usethis::use_data(
+#   font_info,
+#   font_names,
+#   internal = FALSE,
+#   overwrite = TRUE
+# )

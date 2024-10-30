@@ -7,30 +7,30 @@
 bitmap_text_matrix(
   text,
   font = "unifont",
-  line_height = NULL,
+  dx = 0L,
+  dy = 0L,
   scale = 1,
   missing = NULL
 )
 }
 \arguments{
-\item{text}{Single text string. Can include carriage returns.}
+\item{text}{Single text string. Can include carriage returns to split text 
+over multiple lines.}
 
-\item{font}{Name of bitmap font. One of the following:
-\itemize{
-  \item{spleen: "spleen-12x24", "spleen-16x32", "spleen-32x64", "spleen-5x8", "spleen-6x12", "spleen-8x16"}
-  \item{tamzen: "Tamzen10x20b", "Tamzen10x20r", "Tamzen5x9b", "Tamzen5x9r", "Tamzen6x12b", "Tamzen6x12r", "Tamzen7x13b", "Tamzen7x13r", "Tamzen7x14b", "Tamzen7x14r", "Tamzen8x15b", "Tamzen8x15r", "Tamzen8x16b", "Tamzen8x16r"}
-  \item{"unifomt" (the default)}
-  \item{unscii: "unscii-8", "unscii-8-thin"}
-}}
+\item{font}{Name of bitmap font, or a 'lofi' font object.  Default: 'unifont'.
+Use \code{get_lofi_names('bitmap')} to retrieve a list of all valid
+bitmap fonts included in this package.  To create a 'lofi' font object
+use \code{\link{convert_bm_font_to_lofi}()}}
 
-\item{line_height}{Integer value for the vertical distance between multiple lines
-of text.  Use this to override the font's lineheight.
-Default: NULL means to use the font's built-in lineheight.}
+\item{dx}{Additional character spacing in the horizontal direction. Default: 0}
+
+\item{dy}{Additional character spacing in the vertical direction i.e. between 
+rows of text. Default: 0}
 
 \item{scale}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 Scale up the matrix or raster result by this factor}
 
-\item{missing}{Codepoint (integer) to use if glyph not found in font. 
+\item{missing}{Codepoint to use if glyph not found in font. 
 Default: NULL means to use the default specified by the font internally.
 Otherwise it will default to the codepoint for '?'}
 }
