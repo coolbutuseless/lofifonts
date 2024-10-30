@@ -40,7 +40,11 @@ bitmap_text_coords <- function(text, font = "unifont", line_height = NULL, missi
     return(data.frame())
   }
   
-  bitmap <- bitmaps[[font]]
+  if (inherits(font, 'lofifont')) {
+    bitmap <- font
+  } else {
+    bitmap <- bitmaps[[font]]
+  }
   if (is.null(bitmap)) {
     stop("No such bitmap font: ", font)
   }

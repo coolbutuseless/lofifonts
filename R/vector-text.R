@@ -47,16 +47,21 @@ vector_text_coords <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
     return(data.frame())
   }
   
-  font <- match.arg(font)
-  # arcade is only lower case. gridfont is only uppercase
-  if (font == 'arcade') {
-    text <- toupper(text)
+  if (inherits(font, 'lofifont')) {
+    vector <- font 
   } else {
-    text <- tolower(text)
+    font <- match.arg(font)
+    # arcade is only lower case. gridfont is only uppercase
+    if (font == 'arcade') {
+      text <- toupper(text)
+    } else {
+      text <- tolower(text)
+    }
+    
+    vector <- vectors[[font]]
   }
   
   
-  vector <- vectors[[font]]
   if (is.null(vector)) {
     stop("No such vector font: ", font)
   }
@@ -166,7 +171,6 @@ vector_text_matrix <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
                                scale = 1, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
-  font <- match.arg(font)
   
   if (is.null(dx) && scale < 2) {
     dx <- 1L
@@ -221,7 +225,6 @@ vector_text_raster <- function(text, font = c('gridfont', 'gridfont_smooth', 'ar
                                scale = 10, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
-  font <- match.arg(font)
   
   mat <- vector_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy, missing = missing)
   as.raster(1L - mat)
