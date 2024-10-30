@@ -50,7 +50,7 @@ compact_bitmap <- function(font) {
   coords <- do.call(rbind, dfs)
   
   row_ends    <- cumsum(lens)
-  row_starts  <- c(1, head(row_ends, -1) + 1)
+  row_starts  <- c(1L, head(row_ends, -1) + 1L)
   
   idx_to_rows <- mapply(seq.int, row_starts, row_ends, SIMPLIFY = FALSE)
   

@@ -42,7 +42,8 @@ convert_bm_font_to_lofi <- function(font) {
     # print(i)
     char <- font[[i]]
     mat <- unclass(char)
-    coords <- arrayInd(which(mat > 0), dim(mat))
+    # coords <- arrayInd(as.logical(mat), dim(mat))
+    coords <- arrayInd(which(as.logical(mat)), dim(mat))
     coords <- coords[, 2:1, drop = FALSE]
     coords <- as.data.frame(coords)
     names(coords) <- c('x', 'y')
@@ -113,10 +114,11 @@ convert_bm_font_to_lofi <- function(font) {
   # Full font spec
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   lofi <- list(
-    coords           = coords,
-    codepoint_to_idx = idx,
-    line_height      = line_height,
-    glyph_info       = glyphs
+    coords            = coords,
+    codepoint_to_idx  = idx,
+    line_height       = line_height,
+    default_codepoint = utf8ToInt('?'),
+    glyph_info        = glyphs
   )
   
   class(lofi) <- 'lofifont'
@@ -129,9 +131,18 @@ if (FALSE) {
   filename <- system.file("fonts/spleen/spleen-8x16.hex.gz", package = "bittermelon")
   bmfont <- bittermelon::read_hex(filename)
   
-  bmfont <- bittermelon::read_yaff("/usr/local/lib/R/site-library/bittermelon/fonts/fixed/4x6.yaff.gz")
+  # filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
+  # bmfont <- bittermelon::read_hex(filename)
   
   lofi <- convert_bm_font_to_lofi(bmfont)
   lofi
+  
+  # grid::grid.newpage()
+  
+  bitmap_text_raster('hello', font = lofi) |>
+    plot(interpolate = FALSE)
+  
+  
+  df <- bitmap_text_coords('hello', font = lofi) 
 }
 
