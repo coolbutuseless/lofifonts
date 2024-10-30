@@ -27,7 +27,7 @@ lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
 txt <- intToUtf8(seq(lo, hi))
 
-for (font_name in names(font_info$bitmap)) {
+for (font_name in get_lofifont_names()$bitmap) {
   coords <- bitmap_text_coords(txt, font_name)
   
   p <- ggplot(coords) +

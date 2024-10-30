@@ -25,7 +25,7 @@ library(lofifonts)
 ### Vector Fonts: included fonts
 
 ```{r}
-names(font_info$vector)
+get_lofifont_names()$vector
 ```
 
 | Type   | Name            | Sizes                         | Unicode?              | # glyphs |
