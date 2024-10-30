@@ -27,13 +27,20 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   
   idxs <- lofifont$codepoint_to_idx[codepoints + 1L]
   
-  # Determine what char should be used for missing
-  if (is.character(missing)) {
-    missing <- utf8ToInt(missing)[[1]]
+  if (anyNA(idxs)) {
+    # Determine what char should be used for missing
+    missing <- missing %||% lofifont$default_codepoint %||% utf8ToInt('?')
+    if (is.character(missing)) {
+      missing <- utf8ToInt(missing)[[1]]
+    }
+    
+    if (!missing %in% lofifont$glyph_info$codepoint) {
+      stop("Codepoint for missing glyphs is not part of this font! Codepoint = ", missing)  
+    }
+    
+    idxs[is.na(idxs)] <- missing
   }
-  missing <- missing %||% lofifont$font_info$default_char %||% utf8ToInt('?')
   
-  idxs[is.na(idxs)] <- missing
   
   glyphs <- lofifont$glyph_info[idxs, , drop = FALSE]
   starts <- glyphs$row_start
@@ -77,6 +84,38 @@ lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
   
   res
 }
+
+
+assert_lofifont <- function(lofifont) {
+  stopifnot(exprs = {
+    inherits(lofifont, 'lofifont')
+     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofifont))
+     
+     is.data.frame(lofifont$coords)
+     nrow(lofifont$coords) > 0
+     
+     is.atomic(lofifont$codepoint_to_idx)
+     length(lofifont$codepoint_to_idx > 0)
+     
+     is.numeric(lofifont$default_codepoint)
+     length(lofifont$default_codepoint) == 1
+     
+     is.numeric(lofifont$line_height)
+     length(lofifont$line_height) == 1
+     
+     is.data.frame(lofifont$glyph_info)
+     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofifont$glyph_info))
+     nrow(lofifont$glyph_info) > 0
+  })
+}
+
+assert_lofi_vector <- function(lofifont) {
+  assert_lofi(lofifont)
+  stopifnot(exprs = {
+    all(c("codepoint", "stroke_idx", "point_idx", "x", "y") %in% names(lofifont$coords))
+  })
+}
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

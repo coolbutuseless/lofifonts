@@ -70,11 +70,23 @@ compact_bitmap <- function(font) {
   )
   row.names(glyph_info) <- NULL
   
+  
+  default_char <- font$font_info$default_char
+  if (is.null(default_char)) {
+    default_char <- utf8ToInt('?')
+  }
+  if (is.character(default_char)) {
+    default_codepoint <- utf8ToInt(default_char)
+  } else {
+    default_codepoint <- as.integer(default_char)
+  }  
+  
   res <- list(
-    coords           = coords,
-    codepoint_to_idx = font$idx,
-    line_height      = font$font_info$line_height,
-    glyph_info       = glyph_info
+    coords            = coords,
+    codepoint_to_idx  = font$idx,
+    line_height       = font$font_info$line_height,
+    default_codepoint = default_codepoint,
+    glyph_info        = glyph_info
   )
   class(res) <- 'lofifont'
   res
@@ -127,6 +139,7 @@ vector_font_compact <- function(font) {
     coords            = font,
     codepoint_to_idx  = idx,
     line_height       = height,
+    default_codepoint = utf8ToInt('?'),
     glyph_info        = glyph_info
   )
   class(res) <- 'lofifont'
