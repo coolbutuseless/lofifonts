@@ -1,4 +1,84 @@
 
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Common funtion for extracting data.frames from a lofifont
+#' This works with both bitmap and vector fonts
+#' 
+#' @param text string
+#' @param lofifont lofifont object
+#' @param dx,dy extra spacing offsets for each character
+#' @param missing which character to use if any codepoint is not available in 
+#'        this font
+#' @return data.frame of coordinates/lines for this text
+#' @noRd
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+lofi_text_coords <- function(text, lofifont, dx, dy, missing) {
+  
+  stopifnot(inherits(lofifont, 'lofifont'))
+  
+  codepoints <- utf8ToInt(text)
+  
+  # Remove carriage returns and calculate lines
+  is_cr      <- codepoints == 10
+  line       <- cumsum(is_cr)[!is_cr]
+  codepoints <- codepoints[!is_cr]
+  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  
+  idxs <- lofifont$codepoint_to_idx[codepoints + 1L]
+  
+  # Determine what char should be used for missing
+  if (is.character(missing)) {
+    missing <- utf8ToInt(missing)[[1]]
+  }
+  missing <- missing %||% lofifont$font_info$default_char %||% utf8ToInt('?')
+  
+  idxs[is.na(idxs)] <- missing
+  
+  glyphs <- lofifont$glyph_info[idxs, , drop = FALSE]
+  starts <- glyphs$row_start
+  ends   <- glyphs$row_end  
+  widths <- glyphs$width    
+  lens   <- glyphs$npoints  
+  
+  row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
+  row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
+  
+  res <- lofifont$coords[row_idxs, ]
+  
+  # adjust widths if requested
+  widths <- widths + as.integer(dx)
+  
+  # xoffset needs to reset to 0 after every linebreak
+  xoffset <- integer(0)
+  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
+  for (i in seq_along(linestart)) {
+    if (linestart[i] == linebreak[i]) {
+      xoffset <- c(xoffset, 0L)
+    } else {
+      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
+      xoffset <- c(xoffset, 0L, this_offset)
+    }
+  }
+  xoffset
+  res$xoffset <- rep.int(xoffset, lens)
+  
+  
+  res$char_idx  <- rep.int(seq_along(idxs), lens)
+  res$codepoint <- rep.int(codepoints, lens)
+  res$x0        <- res$x
+  res$y0        <- res$y
+  res$line      <- rep.int(line, lens)
+  
+  line_height <- lofifont$line_height %||% (max(res$y0) + 1L)
+  res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
+  
+  res$x <- res$x + res$xoffset
+  
+  res
+}
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Create a data.frame of pixel coordinate information of the rendered text
 #'
@@ -41,71 +121,15 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
   }
   
   if (inherits(font, 'lofifont')) {
-    bitmap <- font
+    lofifont <- font
   } else {
-    bitmap <- bitmaps[[font]]
+    lofifont <- bitmaps[[font]]
   }
-  if (is.null(bitmap)) {
+  if (is.null(lofifont)) {
     stop("No such bitmap font: ", font)
   }
   
-  codepoints <- utf8ToInt(text)
-  
-  # Remove carriage returns and calculate lines
-  is_cr      <- codepoints == 10
-  line       <- cumsum(is_cr)[!is_cr]
-  codepoints <- codepoints[!is_cr]
-  linebreak  <- c(which(diff(line) > 0), length(codepoints))
-  
-  idxs <- bitmap$codepoint_to_idx[codepoints + 1L]
-  
-  # Determine what char should be used for missing
-  if (is.character(missing)) {
-    missing <- utf8ToInt(missing)[[1]]
-  }
-  missing <- missing %||% bitmap$font_info$default_char %||% utf8ToInt('?')
-  
-  idxs[is.na(idxs)] <- missing
-  
-  glyphs <- bitmap$glyph_info[idxs, , drop = FALSE]
-  starts <- glyphs$row_start
-  ends   <- glyphs$row_end  
-  widths <- glyphs$width    
-  lens   <- glyphs$npoints  
-  
-  row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
-  row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
-  
-  res <- bitmap$coords[row_idxs, ]
-  
-  # adjust widths if requested
-  widths <- widths + as.integer(dx)
-  
-  # xoffset needs to reset to 0 after every linebreak
-  xoffset <- integer(0)
-  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
-  for (i in seq_along(linestart)) {
-    if (linestart[i] == linebreak[i]) {
-      xoffset <- c(xoffset, 0L)
-    } else {
-      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
-      xoffset <- c(xoffset, 0L, this_offset)
-    }
-  }
-  xoffset
-  res$xoffset <- rep.int(xoffset, lens)
-  
-  
-  res$char_idx  <- rep.int(seq_along(idxs), lens)
-  res$codepoint <- rep.int(codepoints, lens)
-  res$x0        <- res$x
-  res$y0        <- res$y
-  res$line      <- rep.int(line, lens)
-  
-  line_height <- bitmap$line_height %||% (max(res$y0) + 1L)
-  res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
-  
-  res$x <- res$x + res$xoffset
+  res <- lofi_text_coords(text, lofifont = lofifont, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
   class(res) <- c('tbl_df', 'tbl', 'data.frame')
