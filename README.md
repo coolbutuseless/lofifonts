@@ -364,6 +364,46 @@ ggplot(coords) +
 
 <img src="man/figures/README-unicode2-1.png" width="100%" />
 
+## Large block of text in bitmap font
+
+``` r
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(2) |>
+  strwrap(40) |>
+  paste(collapse = "\n") |>
+  bitmap_text_raster() |>
+  plot()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+``` r
+par(oldpar)
+```
+
+## Large block of text in vector font
+
+``` r
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(1) |>
+  strwrap(60) |>
+  paste(collapse = "\n") |>
+  vector_text_raster(font = 'gridfont_smooth') |>
+  plot(interpolate = FALSE)
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+``` r
+par(oldpar)
+```
+
 ## Bitmap Fonts: Font Sheets
 
 A selection of the glyphs from each of the bitmap fonts

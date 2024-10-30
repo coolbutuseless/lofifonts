@@ -252,6 +252,40 @@ ggplot(coords) +
 ```
 
 
+## Large block of text in bitmap font
+
+```{r}
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(2) |>
+  strwrap(40) |>
+  paste(collapse = "\n") |>
+  bitmap_text_raster() |>
+  plot()
+
+par(oldpar)
+```
+
+
+## Large block of text in vector font
+
+```{r fig.width = 21, fig.height = 6}
+library(lorem)
+set.seed(1)
+oldpar <- par(mai = c(0, 0, 0, 0))
+
+lorem::ipsum(1) |>
+  strwrap(60) |>
+  paste(collapse = "\n") |>
+  vector_text_raster(font = 'gridfont_smooth') |>
+  plot(interpolate = FALSE)
+
+par(oldpar)
+```
+
+
 
 ## Bitmap Fonts: Font Sheets
 
