@@ -23,7 +23,7 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   is_cr      <- codepoints == 10
   line       <- cumsum(is_cr)[!is_cr]
   codepoints <- codepoints[!is_cr]
-  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  linebreak  <- which(diff(line) > 0) + 1L
   
   idxs <- lofi$codepoint_to_idx[codepoints + 1L]
   
@@ -57,17 +57,7 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   widths <- widths + as.integer(dx)
   
   # xoffset needs to reset to 0 after every linebreak
-  xoffset <- integer(0)
-  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
-  for (i in seq_along(linestart)) {
-    if (linestart[i] == linebreak[i]) {
-      xoffset <- c(xoffset, 0L)
-    } else {
-      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
-      xoffset <- c(xoffset, 0L, this_offset)
-    }
-  }
-  xoffset
+  xoffset     <- cumsum_cut(widths, linebreak)
   res$xoffset <- rep.int(xoffset, lens)
   
   
@@ -85,46 +75,6 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   res
 }
 
-
-assert_lofi <- function(lofi) {
-  stopifnot(exprs = {
-    inherits(lofi, 'lofi')
-     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofi))
-     
-     is.data.frame(lofi$coords)
-     nrow(lofi$coords) > 0
-     
-     is.atomic(lofi$codepoint_to_idx)
-     length(lofi$codepoint_to_idx) > 0
-     
-     is.numeric(lofi$default_codepoint)
-     length(lofi$default_codepoint) == 1
-     
-     is.numeric(lofi$line_height)
-     length(lofi$line_height) == 1
-     
-     is.data.frame(lofi$glyph_info)
-     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofi$glyph_info))
-     nrow(lofi$glyph_info) > 0
-  })
-  TRUE
-}
-
-assert_lofi_vector <- function(lofi) {
-  assert_lofi(lofi)
-  stopifnot(exprs = {
-    all(c("stroke_idx", "x", "y") %in% names(lofi$coords))
-  })
-  TRUE
-}
-
-assert_lofi_bitmap <- function(lofi) {
-  assert_lofi(lofi)
-  stopifnot(exprs = {
-    all(c("x", "y") %in% names(lofi$coords))
-  })
-  TRUE
-}
 
 
 
