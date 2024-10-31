@@ -55,6 +55,10 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
   res <- lofi$coords[row_idxs, ]
+  if (is.raw(res$x)) {
+    res$x <- as.integer(res$x)
+    res$y <- as.integer(res$y)
+  }
   
   # adjust widths if requested
   widths <- widths + as.integer(dx)
@@ -62,7 +66,6 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   # xoffset needs to reset to 0 after every linebreak
   xoffset     <- cumsum_cut(widths, linebreak)
   res$xoffset <- rep.int(xoffset, npoints)
-  
   
   res$char_idx  <- rep.int(seq_along(idxs), npoints)
   res$codepoint <- rep.int(codepoints, npoints)

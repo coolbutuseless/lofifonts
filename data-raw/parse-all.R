@@ -107,6 +107,11 @@ compact_bitmap <- function(font) {
   
   
   
+  ## Convert x,y to raw
+  res$coords$x <- as.raw(res$coords$x)
+  res$coords$y <- as.raw(res$coords$y)
+  
+  
   res
 }
 
