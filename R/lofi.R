@@ -36,6 +36,7 @@
 #'   if the font does not contain a given glyph}
 #'   \item{baseline_offset}{Numeric value. The offset between the bottom of the
 #'   font data and the baseline for the text}
+#'   \item{name}{name of font}
 #'   \item{glyph_info}{A data.frame of meta-information about each glyph.  One
 #'   row per glyph}
 #'   \describe{

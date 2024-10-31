@@ -106,6 +106,7 @@ bitmap_fonts <- bitmaps2
 # insert yoffsets 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 for (nm in names(bitmap_fonts)) {
+  bitmap_fonts[[nm]]$name <- nm
   if (nm %in% names(yoffs)) {
     bitmap_fonts[[nm]]$baseline_offset <- yoffs[[nm]]
   } else {
@@ -173,7 +174,7 @@ vector_font_compact <- function(font) {
     line_height       = height,
     default_codepoint = utf8ToInt('?'),
     glyph_info        = glyph_info,
-    baseline_offset   = 1
+    baseline_offset   = 0
   )
   class(res) <- c('lofi', 'lofi-vector')
   res
@@ -185,8 +186,14 @@ vector_fonts <- list(
   gridfont_smooth = vector_font_compact(gridfont_smooth)
 )
 
-vector_fonts$arcade$baseline_offset <- 0
+vector_fonts$arcade$baseline_offset <- 3
+vector_fonts$gridfont$baseline_offset <- 3
+vector_fonts$gridfont_smooth$baseline_offset <- 3
 
+
+for (nm in names(vector_fonts)) {
+  vector_fonts[[nm]]$name <- nm
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove some small floating point negative values e.g. -2.1e-17
