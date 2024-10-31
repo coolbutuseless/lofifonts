@@ -91,6 +91,22 @@ compact_bitmap <- function(font) {
     glyph_info        = glyph_info
   )
   class(res) <- c('lofi', 'lofi-bitmap')
+  
+  # Remove some glyph info for character 32
+  na_rows <- which(is.na(res$coords$x))
+  res$coords$x[na_rows] <- 0L
+  res$coords$y[na_rows] <- 0L
+  
+  for (na_row in na_rows) {
+    idx <- which(res$glyph_info$row_start <= na_row & res$glyph_info$row_end >= na_row)
+    stopifnot(length(idx) == 1)
+    res$glyph_info$npoints  [idx] <- 0L
+    res$glyph_info$row_start[idx] <- NA_integer_
+    res$glyph_info$row_end  [idx] <- NA_integer_
+  }
+  
+  
+  
   res
 }
 
@@ -120,11 +136,11 @@ for (nm in names(bitmap_fonts)) {
 #' Assert no zeros or negatives in coords
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 for (lofi in bitmap_fonts) {
-  xmin <- min(lofi$coords$x, na.rm = TRUE)
-  ymin <- min(lofi$coords$y, na.rm = TRUE)
-  cat(xmin, ymin, "\n")
-  stopifnot(xmin > 0)
-  stopifnot(ymin > 0)
+  cat(lofi$name, "\n")
+  stopifnot(!anyNA(lofi$coords$x))
+  stopifnot(!anyNA(lofi$coords$y))
+  stopifnot(all(lofi$coords$x >= 0))
+  stopifnot(all(lofi$coords$y >= 0))
 }
 
 
@@ -177,6 +193,21 @@ vector_font_compact <- function(font) {
     baseline_offset   = 0
   )
   class(res) <- c('lofi', 'lofi-vector')
+  
+  # Remove some glyph info for empty characters
+  na_rows <- which(is.na(res$coords$x))
+  res$coords$x[na_rows] <- 0L
+  res$coords$y[na_rows] <- 0L
+  
+  for (na_row in na_rows) {
+    idx <- which(res$glyph_info$row_start <= na_row & res$glyph_info$row_end >= na_row)
+    stopifnot(length(idx) == 1)
+    res$glyph_info$npoints  [idx] <- 0L
+    res$glyph_info$row_start[idx] <- NA_integer_
+    res$glyph_info$row_end  [idx] <- NA_integer_
+  }
+  
+  
   res
 }
 
@@ -212,7 +243,10 @@ for (lofi in vector_fonts) {
   cat(xmin, ymin, "\n")
   stopifnot(xmin >= 0)
   stopifnot(ymin >= 0)
+  stopifnot(!anyNA(lofi$coords$x))
+  stopifnot(!anyNA(lofi$coords$y))
 }
+
 
 
 

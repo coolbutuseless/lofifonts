@@ -4,6 +4,7 @@
 #' Convert a 'bittermelon' 'bm_font' to a lofi font 
 #' 
 #' @param font font object of class \code{bm_font}
+#' @param font_name Name of font
 #' @return lofi font object
 #' @examplesIf interactive() && requireNamespace('bittermelon', quietly = TRUE)
 #' filename <- system.file("fonts/spleen/spleen-8x16.hex.gz", package = "bittermelon")
@@ -12,7 +13,7 @@
 #' lofi
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-convert_bm_font_to_lofi <- function(font) {
+convert_bm_font_to_lofi <- function(font, font_name = "Unknown") {
   
   if (!inherits(font, "bm_font")) {
     stop("Must be a 'bm_font' object")
@@ -118,10 +119,30 @@ convert_bm_font_to_lofi <- function(font) {
     codepoint_to_idx  = idx,
     line_height       = line_height,
     default_codepoint = utf8ToInt('?'),
+    name              = font_name,
     glyph_info        = glyphs
   )
   
   class(lofi) <- c('lofi', 'lofi-bitmap')
+  
+  # Remove some glyph info for empty characters
+  na_rows <- which(is.na(lofi$coords$x))
+  lofi$coords$x[na_rows] <- 0L
+  lofi$coords$y[na_rows] <- 0L
+  
+  for (na_row in na_rows) {
+    idx <- which(lofi$glyph_info$row_start <= na_row & lofi$glyph_info$row_end >= na_row)
+    stopifnot(length(idx) == 1)
+    lofi$glyph_info$npoints  [idx] <- 0L
+    lofi$glyph_info$row_start[idx] <- NA_integer_
+    lofi$glyph_info$row_end  [idx] <- NA_integer_
+  }
+  
+  
+  stopifnot(!anyNA(lofi$coords$x))
+  stopifnot(!anyNA(lofi$coords$y))
+  
+  
   lofi
 }
 

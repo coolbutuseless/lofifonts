@@ -2,7 +2,7 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Common funtion for extracting data.frames from a lofi font
+#' Common function for extracting data.frames from a lofi font
 #' This works with both bitmap and vector fonts
 #' 
 #' @param text string
@@ -42,11 +42,14 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   }
   
   
-  glyphs <- lofi$glyph_info[idxs, , drop = FALSE]
-  starts <- glyphs$row_start
-  ends   <- glyphs$row_end  
-  widths <- glyphs$width    
-  lens   <- glyphs$npoints  
+  glyphs  <- lofi$glyph_info[idxs, , drop = FALSE]
+  starts  <- glyphs$row_start
+  ends    <- glyphs$row_end  
+  widths  <- glyphs$width    
+  npoints <- glyphs$npoints  
+  
+  starts <- starts[npoints > 0]
+  ends   <- ends  [npoints > 0]
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
@@ -58,14 +61,14 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   
   # xoffset needs to reset to 0 after every linebreak
   xoffset     <- cumsum_cut(widths, linebreak)
-  res$xoffset <- rep.int(xoffset, lens)
+  res$xoffset <- rep.int(xoffset, npoints)
   
   
-  res$char_idx  <- rep.int(seq_along(idxs), lens)
-  res$codepoint <- rep.int(codepoints, lens)
+  res$char_idx  <- rep.int(seq_along(idxs), npoints)
+  res$codepoint <- rep.int(codepoints, npoints)
   res$x0        <- res$x
   res$y0        <- res$y
-  res$line      <- rep.int(line, lens)
+  res$line      <- rep.int(line, npoints)
   
   line_height <- lofi$line_height %||% (max(res$y0) + 1L)
   res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
@@ -143,20 +146,6 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 coords_to_mat <- function(df) {
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # y coords can sometimes be negative because of descenders/offsets
-  # so push them all to be at least "1", so that (x,y) coords can be used
-  # as matrix indices
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
-  df <- df[!is.na(df$x) & !is.na(df$y),]
-  
-  if (any(df$y < 1)) {
-    df$y <- df$y + abs(min(df$y)) + 1L
-  }
-  if (any(df$x < 1)) {
-    df$x <- df$x + abs(min(df$x)) + 1L
-  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create a matrix of the appropriate size

@@ -5,9 +5,11 @@ Version: 0.1.0.9002
 Authors@R: c(
     person("Mike", "Cheng", role = c("aut", "cre", 'cph'), email = "mikefc@coolbutuseless.com"),
     person("June", "Choe", role = "ctb", email = "junechoe@june.choe.com", comment = "Contributed code for character positioning"),
-    person("Frederic", "Cambus", role = c("aut", "cph"), email = "fred@statdns.com", comment = "Creator of 'spleen' font"),
-    person("GNU Unifont authors", role = "cph", comment = "Creators of 'unifont'"),
-    person("Anders", "Hoff", role = c("aut", "cph"), comment = "Creator of 'gridfont' font"))
+    person("Frederic", "Cambus", role = c("cph", "tyd"), email = "fred@statdns.com", comment = "Creator of 'spleen' font"),
+    person("GNU Unifont authors", role = c("cph", "tyd"), comment = "Creators of 'unifont'"),
+    person("Suraj", "Kurapati", role = c("cph", "tyd"), comment = "Creator of 'Tamzen' font"),
+    person("Scott", "Fial", role = c("cph", "tyd"), comment = "Creator of 'Tamsyn' font upon which 'Tamzen' is based"),
+    person("Anders", "Hoff", role = c("cph", "tyd"), comment = "Creator of 'gridfont' font"))
 Maintainer: Mike Cheng <mikefc@coolbutuseless.com>
 Description: Alternate font rendering is useful when rendering to novel
    graphics outputs where modern font rendering is not available or 

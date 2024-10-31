@@ -387,7 +387,7 @@ lofi <- convert_bm_font_to_lofi(bmfont)
 lofi
 ```
 
-    #> [lofi font] 4 x 6. 919 codepoints.
+    #> [lofi bitmap font] 4 x 6. 919 codepoints.
 
 ``` r
 # Layout the text and render to a raster
