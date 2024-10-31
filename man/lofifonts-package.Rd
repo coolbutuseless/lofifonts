@@ -27,6 +27,7 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item June Choe \email{junechoe@june.choe.com} (Contributed code for character positioning) [contributor]
   \item GNU Unifont authors (Creators of 'unifont') [copyright holder]
 }
 
