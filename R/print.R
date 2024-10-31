@@ -23,9 +23,11 @@ print.lofi <- function(x, ...) {
     )
   }
   
+  type <- ifelse(inherits(x, 'lofi-bitmap'), 'bitmap', 'vector')
   
   msg <- sprintf(
-    "[lofi font] %i x %i. %i codepoints.%s\n", 
+    "[lofi %s font] %i x %i. %i codepoints.%s\n", 
+    type,
     median(x$glyph_info$width), 
     x$line_height,
     nrow(x$glyph_info),

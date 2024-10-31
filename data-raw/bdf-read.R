@@ -263,8 +263,8 @@ parse_char <- function(txt, height, codepoint_from_startchar) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   coords <- bitmap_ints_to_df(bitmap_ints, dwidth = dwidth)
   if (!is.null(coords) && nrow(coords) > 0) {
-    coords$x <- coords$x + bbox[3]
-    coords$y <- coords$y + bbox[4]
+    # coords$x <- coords$x + bbox[3]
+    # coords$y <- coords$y + bbox[4]
     
     coords$codepoint <- encoding
     coords$width <- 0L

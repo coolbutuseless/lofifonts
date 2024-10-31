@@ -19,15 +19,14 @@ Useful links:
 \author{
 \strong{Maintainer}: Mike Cheng \email{mikefc@coolbutuseless.com} [copyright holder]
 
-Authors:
-\itemize{
-  \item Frederic Cambus \email{fred@statdns.com} (Creator of 'spleen' font) [copyright holder]
-  \item Anders Hoff (Creator of 'gridfont' font) [copyright holder]
-}
-
 Other contributors:
 \itemize{
-  \item GNU Unifont authors (Creators of 'unifont') [copyright holder]
+  \item June Choe \email{junechoe@june.choe.com} (Contributed code for character positioning) [contributor]
+  \item Frederic Cambus \email{fred@statdns.com} (Creator of 'spleen' font) [copyright holder, type designer]
+  \item GNU Unifont authors (Creators of 'unifont') [copyright holder, type designer]
+  \item Suraj Kurapati (Creator of 'Tamzen' font) [copyright holder, type designer]
+  \item Scott Fial (Creator of 'Tamsyn' font upon which 'Tamzen' is based) [copyright holder, type designer]
+  \item Anders Hoff (Creator of 'gridfont' font) [copyright holder, type designer]
 }
 
 }

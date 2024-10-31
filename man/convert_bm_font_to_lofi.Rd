@@ -4,10 +4,12 @@
 \alias{convert_bm_font_to_lofi}
 \title{Convert a 'bittermelon' 'bm_font' to a lofi font}
 \usage{
-convert_bm_font_to_lofi(font)
+convert_bm_font_to_lofi(font, font_name = "Unknown")
 }
 \arguments{
 \item{font}{font object of class \code{bm_font}}
+
+\item{font_name}{Name of font}
 }
 \value{
 lofi font object

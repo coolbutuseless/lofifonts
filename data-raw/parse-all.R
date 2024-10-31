@@ -91,6 +91,27 @@ compact_bitmap <- function(font) {
     glyph_info        = glyph_info
   )
   class(res) <- c('lofi', 'lofi-bitmap')
+  
+  # Remove some glyph info for character 32
+  na_rows <- which(is.na(res$coords$x))
+  res$coords$x[na_rows] <- 0L
+  res$coords$y[na_rows] <- 0L
+  
+  for (na_row in na_rows) {
+    idx <- which(res$glyph_info$row_start <= na_row & res$glyph_info$row_end >= na_row)
+    stopifnot(length(idx) == 1)
+    res$glyph_info$npoints  [idx] <- 0L
+    res$glyph_info$row_start[idx] <- NA_integer_
+    res$glyph_info$row_end  [idx] <- NA_integer_
+  }
+  
+  
+  
+  ## Convert x,y to raw
+  res$coords$x <- as.raw(res$coords$x)
+  res$coords$y <- as.raw(res$coords$y)
+  
+  
   res
 }
 
@@ -99,7 +120,34 @@ bitmaps2 <- lapply(seq_along(bitmaps1), function(i) {
   compact_bitmap(bitmaps1[[i]])
 })
 names(bitmaps2) <- tolower(names(bitmaps1))
-bitmaps <- bitmaps2
+bitmap_fonts <- bitmaps2
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# insert yoffsets 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (nm in names(bitmap_fonts)) {
+  bitmap_fonts[[nm]]$name <- nm
+  if (nm %in% names(yoffs)) {
+    bitmap_fonts[[nm]]$baseline_offset <- yoffs[[nm]]
+  } else {
+    bitmap_fonts[[nm]]$baseline_offset <- 0L
+  }
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Assert no zeros or negatives in coords
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (lofi in bitmap_fonts) {
+  cat(lofi$name, "\n")
+  stopifnot(!anyNA(lofi$coords$x))
+  stopifnot(!anyNA(lofi$coords$y))
+  stopifnot(all(lofi$coords$x >= 0))
+  stopifnot(all(lofi$coords$y >= 0))
+}
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Assemble vector font
@@ -146,9 +194,25 @@ vector_font_compact <- function(font) {
     codepoint_to_idx  = idx,
     line_height       = height,
     default_codepoint = utf8ToInt('?'),
-    glyph_info        = glyph_info
+    glyph_info        = glyph_info,
+    baseline_offset   = 0
   )
   class(res) <- c('lofi', 'lofi-vector')
+  
+  # Remove some glyph info for empty characters
+  na_rows <- which(is.na(res$coords$x))
+  res$coords$x[na_rows] <- 0L
+  res$coords$y[na_rows] <- 0L
+  
+  for (na_row in na_rows) {
+    idx <- which(res$glyph_info$row_start <= na_row & res$glyph_info$row_end >= na_row)
+    stopifnot(length(idx) == 1)
+    res$glyph_info$npoints  [idx] <- 0L
+    res$glyph_info$row_start[idx] <- NA_integer_
+    res$glyph_info$row_end  [idx] <- NA_integer_
+  }
+  
+  
   res
 }
 
@@ -158,8 +222,37 @@ vector_fonts <- list(
   gridfont_smooth = vector_font_compact(gridfont_smooth)
 )
 
+vector_fonts$arcade$baseline_offset <- 3
+vector_fonts$gridfont$baseline_offset <- 3
+vector_fonts$gridfont_smooth$baseline_offset <- 3
 
-bitmap_fonts <- bitmaps
+
+for (nm in names(vector_fonts)) {
+  vector_fonts[[nm]]$name <- nm
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove some small floating point negative values e.g. -2.1e-17
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+x <- vector_fonts$gridfont_smooth$coords$x
+small_negs <- which(!is.na(x) & x < 0)
+vector_fonts$gridfont_smooth$coords$x[small_negs] <- 0
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Assert no negatives in vector coords
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (lofi in vector_fonts) {
+  xmin <- min(lofi$coords$x, na.rm = TRUE)
+  ymin <- min(lofi$coords$y, na.rm = TRUE)
+  cat(xmin, ymin, "\n")
+  stopifnot(xmin >= 0)
+  stopifnot(ymin >= 0)
+  stopifnot(!anyNA(lofi$coords$x))
+  stopifnot(!anyNA(lofi$coords$y))
+}
+
+
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,40 +265,3 @@ usethis::use_data(
 )
 # file.size("R/sysdata.rda")/1024/1024
 
-
-
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # Create the vectors of codepoints for each bitmap font
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# bdf_names
-# 
-# font_info <- list()
-# font_info$bitmap <- lapply(bitmaps, function(bdf) {
-#   cp <- which(!is.na(bdf$idx)) - 1L
-#   list(codepoints = sort(cp))
-# })
-# 
-# 
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # Extract the codepoints from the vector fonts
-# # Assemble all the font information
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# font_info$vector <- list()
-# font_info$vector$arcade          <- list(codepoints = unique(arcade$codepoint))
-# font_info$vector$gridfont        <- list(codepoints = unique(gridfont$codepoint))
-# font_info$vector$gridfont_smooth <- list(codepoints = unique(gridfont_smooth$codepoint))
-# 
-# font_names <- list(
-#   bitmap = names(font_info$bitmap),
-#   vector = names(font_info$vector)
-# )
-# 
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# # Save the font information for the user of the package
-# #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# usethis::use_data(
-#   font_info,
-#   font_names,
-#   internal = FALSE,
-#   overwrite = TRUE
-# )

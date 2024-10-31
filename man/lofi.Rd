@@ -21,7 +21,12 @@ Each 'lofi' font is a list object with the following members:
   this also includes a 'stroke_idx' to delineate the individual strokes
   within a single glyph.  This is a simple concatenation of \emph{all}
   points (or strokes) in a font.  Extracting this font data for a particular 
-  codepoint requires the use of other indexing elements in the 'lofi' structure}
+  codepoint requires the use of other indexing elements in the 'lofi' structure.
+  NOTE: For bitmap fonts, x, y coordinates must be integers with no values
+  below 1
+  NOTE: For bitmap fonts, (x, y) coordinates must be numeric values with 
+  no values below zero.
+  }
   \item{codepoint_to_idx}{An integer vector. Use a codepoint (integer) 
   to access the row index into the 'glyph_info' data.frame which holds the
   meta-information about this glyph. Because codepoints are indexed from 0, 
@@ -29,6 +34,9 @@ Each 'lofi' font is a list object with the following members:
   \item{line_height}{Integer. The line height of this font in pixels}
   \item{default_codepoing}{Integer. The default unicode codepoint to use
   if the font does not contain a given glyph}
+  \item{baseline_offset}{Numeric value. The offset between the bottom of the
+  font data and the baseline for the text}
+  \item{name}{name of font}
   \item{glyph_info}{A data.frame of meta-information about each glyph.  One
   row per glyph}
   \describe{

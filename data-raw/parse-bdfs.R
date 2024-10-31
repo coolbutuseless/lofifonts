@@ -20,3 +20,23 @@ bitmaps1 <- lapply(bdf_files, function(f) {
 
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# BDF yoffset. Should be a single value across the fonts i'm packaging
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+get_bdf_yoff <- function(bdf_file) {
+  lns <- readLines(bdf_file)
+  lns <- grep("BBX", lns, value = TRUE)
+  lns <- sort(unique(lns))
+  yoff <- strsplit(lns, " ")
+  yoff <- vapply(yoff, \(x) x[5], character(1))
+  yoff <- abs(unique(as.integer(yoff)))
+  
+  if (length(yoff) != 1) {
+    stop("Bad yoff:", bdf_file, deparse1(yoff))
+  }
+  
+  yoff
+}
+
+yoffs <- vapply(bdf_files, get_bdf_yoff, integer(1)) |>
+  setNames(tolower(bdf_names))

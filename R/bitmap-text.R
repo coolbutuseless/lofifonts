@@ -2,7 +2,7 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Common funtion for extracting data.frames from a lofi font
+#' Common function for extracting data.frames from a lofi font
 #' This works with both bitmap and vector fonts
 #' 
 #' @param text string
@@ -23,7 +23,7 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   is_cr      <- codepoints == 10
   line       <- cumsum(is_cr)[!is_cr]
   codepoints <- codepoints[!is_cr]
-  linebreak  <- c(which(diff(line) > 0), length(codepoints))
+  linebreak  <- which(diff(line) > 0) + 1L
   
   idxs <- lofi$codepoint_to_idx[codepoints + 1L]
   
@@ -42,40 +42,36 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   }
   
   
-  glyphs <- lofi$glyph_info[idxs, , drop = FALSE]
-  starts <- glyphs$row_start
-  ends   <- glyphs$row_end  
-  widths <- glyphs$width    
-  lens   <- glyphs$npoints  
+  glyphs  <- lofi$glyph_info[idxs, , drop = FALSE]
+  starts  <- glyphs$row_start
+  ends    <- glyphs$row_end  
+  widths  <- glyphs$width    
+  npoints <- glyphs$npoints  
+  
+  starts <- starts[npoints > 0]
+  ends   <- ends  [npoints > 0]
   
   row_idxs <- mapply(seq.int, starts, ends, SIMPLIFY = FALSE)
   row_idxs <- unlist(row_idxs, recursive = FALSE, use.names = FALSE)
   
   res <- lofi$coords[row_idxs, ]
+  if (is.raw(res$x)) {
+    res$x <- as.integer(res$x)
+    res$y <- as.integer(res$y)
+  }
   
   # adjust widths if requested
   widths <- widths + as.integer(dx)
   
   # xoffset needs to reset to 0 after every linebreak
-  xoffset <- integer(0)
-  linestart <- c(0L, linebreak[-length(linebreak)]) + 1L
-  for (i in seq_along(linestart)) {
-    if (linestart[i] == linebreak[i]) {
-      xoffset <- c(xoffset, 0L)
-    } else {
-      this_offset <- cumsum(widths[seq(linestart[i], linebreak[i] - 1)])
-      xoffset <- c(xoffset, 0L, this_offset)
-    }
-  }
-  xoffset
-  res$xoffset <- rep.int(xoffset, lens)
+  xoffset     <- cumsum_cut(widths, linebreak)
+  res$xoffset <- rep.int(xoffset, npoints)
   
-  
-  res$char_idx  <- rep.int(seq_along(idxs), lens)
-  res$codepoint <- rep.int(codepoints, lens)
+  res$char_idx  <- rep.int(seq_along(idxs), npoints)
+  res$codepoint <- rep.int(codepoints, npoints)
   res$x0        <- res$x
   res$y0        <- res$y
-  res$line      <- rep.int(line, lens)
+  res$line      <- rep.int(line, npoints)
   
   line_height <- lofi$line_height %||% (max(res$y0) + 1L)
   res$y <- res$y + (max(res$line) - res$line) * (line_height + as.integer(dy))
@@ -85,46 +81,6 @@ lofi_text_coords <- function(text, lofi, dx, dy, missing) {
   res
 }
 
-
-assert_lofi <- function(lofi) {
-  stopifnot(exprs = {
-    inherits(lofi, 'lofi')
-     all(c("coords", "codepoint_to_idx", "line_height", "default_codepoint", "glyph_info") %in% names(lofi))
-     
-     is.data.frame(lofi$coords)
-     nrow(lofi$coords) > 0
-     
-     is.atomic(lofi$codepoint_to_idx)
-     length(lofi$codepoint_to_idx) > 0
-     
-     is.numeric(lofi$default_codepoint)
-     length(lofi$default_codepoint) == 1
-     
-     is.numeric(lofi$line_height)
-     length(lofi$line_height) == 1
-     
-     is.data.frame(lofi$glyph_info)
-     all(c("codepoint", "npoints", "row_start", "row_end", "width") %in% colnames(lofi$glyph_info))
-     nrow(lofi$glyph_info) > 0
-  })
-  TRUE
-}
-
-assert_lofi_vector <- function(lofi) {
-  assert_lofi(lofi)
-  stopifnot(exprs = {
-    all(c("stroke_idx", "x", "y") %in% names(lofi$coords))
-  })
-  TRUE
-}
-
-assert_lofi_bitmap <- function(lofi) {
-  assert_lofi(lofi)
-  stopifnot(exprs = {
-    all(c("x", "y") %in% names(lofi$coords))
-  })
-  TRUE
-}
 
 
 
@@ -193,20 +149,6 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 coords_to_mat <- function(df) {
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # y coords can sometimes be negative because of descenders/offsets
-  # so push them all to be at least "1", so that (x,y) coords can be used
-  # as matrix indices
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
-  df <- df[!is.na(df$x) & !is.na(df$y),]
-  
-  if (any(df$y < 1)) {
-    df$y <- df$y + abs(min(df$y)) + 1L
-  }
-  if (any(df$x < 1)) {
-    df$x <- df$x + abs(min(df$x)) + 1L
-  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create a matrix of the appropriate size
