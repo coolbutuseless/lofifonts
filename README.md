@@ -122,69 +122,8 @@ bitmap_text_coords("Hello", font = 'unifont') |>
     #> 2529        1        72 2 10    0  2 10
 
 ``` r
-bitmap_text_matrix("Hello", "unifont") 
-```
-
-    #>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-    #>  [1,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #>  [2,]    0    1    0    0    0    0    1    0    0     0     0     0     0
-    #>  [3,]    0    1    0    0    0    0    1    0    0     0     0     0     0
-    #>  [4,]    0    1    0    0    0    0    1    0    0     0     1     1     1
-    #>  [5,]    0    1    0    0    0    0    1    0    0     1     0     0     0
-    #>  [6,]    0    1    1    1    1    1    1    0    0     1     0     0     0
-    #>  [7,]    0    1    0    0    0    0    1    0    0     1     1     1     1
-    #>  [8,]    0    1    0    0    0    0    1    0    0     1     0     0     0
-    #>  [9,]    0    1    0    0    0    0    1    0    0     1     0     0     0
-    #> [10,]    0    1    0    0    0    0    1    0    0     1     0     0     0
-    #> [11,]    0    1    0    0    0    0    1    0    0     0     1     1     1
-    #> [12,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #> [13,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #>       [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25]
-    #>  [1,]     0     0     0     0     0     0     1     1     0     0     0     0
-    #>  [2,]     0     0     0     0     0     0     0     1     0     0     0     0
-    #>  [3,]     0     0     0     0     0     0     0     1     0     0     0     0
-    #>  [4,]     1     0     0     0     0     0     0     1     0     0     0     0
-    #>  [5,]     0     1     0     0     0     0     0     1     0     0     0     0
-    #>  [6,]     0     1     0     0     0     0     0     1     0     0     0     0
-    #>  [7,]     1     1     0     0     0     0     0     1     0     0     0     0
-    #>  [8,]     0     0     0     0     0     0     0     1     0     0     0     0
-    #>  [9,]     0     0     0     0     0     0     0     1     0     0     0     0
-    #> [10,]     0     1     0     0     0     0     0     1     0     0     0     0
-    #> [11,]     1     0     0     0     0     1     1     1     1     1     0     0
-    #> [12,]     0     0     0     0     0     0     0     0     0     0     0     0
-    #> [13,]     0     0     0     0     0     0     0     0     0     0     0     0
-    #>       [,26] [,27] [,28] [,29] [,30] [,31] [,32] [,33] [,34] [,35] [,36] [,37]
-    #>  [1,]     0     0     1     1     0     0     0     0     0     0     0     0
-    #>  [2,]     0     0     0     1     0     0     0     0     0     0     0     0
-    #>  [3,]     0     0     0     1     0     0     0     0     0     0     0     0
-    #>  [4,]     0     0     0     1     0     0     0     0     0     1     1     1
-    #>  [5,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #>  [6,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #>  [7,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #>  [8,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #>  [9,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #> [10,]     0     0     0     1     0     0     0     0     1     0     0     0
-    #> [11,]     0     1     1     1     1     1     0     0     0     1     1     1
-    #> [12,]     0     0     0     0     0     0     0     0     0     0     0     0
-    #> [13,]     0     0     0     0     0     0     0     0     0     0     0     0
-    #>       [,38] [,39]
-    #>  [1,]     0     0
-    #>  [2,]     0     0
-    #>  [3,]     0     0
-    #>  [4,]     1     0
-    #>  [5,]     0     1
-    #>  [6,]     0     1
-    #>  [7,]     0     1
-    #>  [8,]     0     1
-    #>  [9,]     0     1
-    #> [10,]     0     1
-    #> [11,]     1     0
-    #> [12,]     0     0
-    #> [13,]     0     0
-
-``` r
 bitmap_text_raster("Hello", "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 <img src="man/figures/README-bitmap-raster-1.png" width="100%" />
@@ -192,7 +131,7 @@ bitmap_text_raster("Hello", "unifont") |>
 ``` r
 # Render codepoints directly
 bitmap_text_raster(intToUtf8(c(0x1f44d, 0x1f44e)), "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 <img src="man/figures/README-bitmap-raster-codepoints-1.png" width="100%" />
@@ -205,7 +144,7 @@ string.
 Each pixel in the `coords` data.frame has an `x` and `y` coordinates,
 and to render this font, a small square will be drawn for each pixel.
 
-A gap will be left between the rectangels to highlight the pixelated
+A gap will be left between the rectangles to highlight the pixelated
 origin of the text.
 
 ``` r
@@ -259,35 +198,8 @@ vector_text_coords("Hello") |>
     #> 499        1       104          2 1.1666667 7.000000    0 1.1666667 7.000000
 
 ``` r
-vector_text_matrix("Hello", scale = 1) 
-```
-
-    #>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
-    #>  [1,]    1    0    0    0    0    0    0    0    0     0     1     0     1
-    #>  [2,]    1    0    0    0    0    0    0    0    0     0     1     0     1
-    #>  [3,]    1    1    1    0    0    0    1    1    0     0     1     0     1
-    #>  [4,]    1    0    0    1    0    1    0    0    1     0     1     0     1
-    #>  [5,]    1    0    0    1    0    1    1    1    1     0     1     0     1
-    #>  [6,]    1    0    0    1    0    1    0    0    1     0     1     0     1
-    #>  [7,]    1    0    0    0    0    0    1    1    0     0     1     0     1
-    #>  [8,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #>  [9,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #> [10,]    0    0    0    0    0    0    0    0    0     0     0     0     0
-    #>       [,14] [,15] [,16] [,17] [,18]
-    #>  [1,]     0     0     0     0     0
-    #>  [2,]     0     0     0     0     0
-    #>  [3,]     0     0     1     1     0
-    #>  [4,]     0     1     0     0     1
-    #>  [5,]     0     1     0     0     1
-    #>  [6,]     0     1     0     0     1
-    #>  [7,]     0     0     1     1     0
-    #>  [8,]     0     0     0     0     0
-    #>  [9,]     0     0     0     0     0
-    #> [10,]     0     0     0     0     0
-
-``` r
 vector_text_raster("Hello\n#RStats!", scale = 5) |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 <img src="man/figures/README-vector-raster-1.png" width="100%" />
@@ -297,12 +209,11 @@ vector_text_raster("Hello\n#RStats!", scale = 5) |>
 This is an example of bespoke rendering of the strokes for an example
 string.
 
-For each character (`char_idx`) there are 1-or-more strokes (`stroke`).
-Each stroke has has 2 or more rows giving the path for this particular
-stroke.
+For each character (`char_idx`) there are 1-or-more strokes
+(`stroke_idx`). Each stroke has has 2 or more rows giving the path for
+this particular stroke.
 
-When plotting with ggplot, draw path for the
-points-within-strokes-within-characters.
+When plotting with ggplot, draw paths for stroke-within-character.
 
 ``` r
 library(ggplot2)
@@ -348,7 +259,7 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 # Render quickly with built-in conversion
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bitmap_text_raster(txt, "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 <img src="man/figures/README-unicode-1.png" width="100%" />
@@ -392,7 +303,7 @@ lofi
 ``` r
 # Layout the text and render to a raster
 bitmap_text_raster('hello', font = lofi) |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
@@ -401,10 +312,9 @@ bitmap_text_raster('hello', font = lofi) |>
 
 ``` r
 library(lorem)
-set.seed(1)
-oldpar <- par(mai = c(0, 0, 0, 0))
 
-lorem::ipsum(2) |>
+set.seed(1)
+lorem::ipsum(1) |>
   strwrap(40) |>
   paste(collapse = "\n") |>
   bitmap_text_raster() |>
@@ -413,29 +323,20 @@ lorem::ipsum(2) |>
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
-``` r
-par(oldpar)
-```
-
 ## Large block of text in vector font
 
 ``` r
 library(lorem)
 set.seed(1)
-oldpar <- par(mai = c(0, 0, 0, 0))
 
 lorem::ipsum(1) |>
-  strwrap(60) |>
+  strwrap(50) |>
   paste(collapse = "\n") |>
   vector_text_raster() |>
-  plot(interpolate = FALSE)
+  plot(interpolate = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
-
-``` r
-par(oldpar)
-```
 
 ## Bitmap Fonts: Font Sheets
 

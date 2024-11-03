@@ -121,21 +121,15 @@ bitmap_text_coords("Hello", font = 'unifont') |>
   head()
 ```
 
-
-```{r bitmap-matrix, fig.height = 3}
-bitmap_text_matrix("Hello", "unifont") 
-```
-
-
-```{r bitmap-raster, fig.height = 3}
+```{r bitmap-raster, fig.height = 0.5}
 bitmap_text_raster("Hello", "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
-```{r bitmap-raster-codepoints, fig.height = 3}
+```{r bitmap-raster-codepoints, fig.height = 0.5}
 # Render codepoints directly
 bitmap_text_raster(intToUtf8(c(0x1f44d, 0x1f44e)), "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 ## Bitmap font: Bespoke pixel rendering
@@ -145,7 +139,7 @@ This is an example of bespoke rendering of the pixel data for an example string.
 Each pixel in the `coords` data.frame has an `x` and `y` coordinates, and to 
 render this font, a small square will be drawn for each pixel.  
 
-A gap will be left between the rectangels to highlight the pixelated origin 
+A gap will be left between the rectangles to highlight the pixelated origin 
 of the text.
 
 ```{r bitmap-bespoke, fig.height = 4}
@@ -181,14 +175,9 @@ vector_text_coords("Hello") |>
 ```
 
 
-```{r vector-matrix, fig.height = 3}
-vector_text_matrix("Hello", scale = 1) 
-```
-
-
-```{r vector-raster, fig.height = 3}
-vector_text_raster("Hello\n#RStats!", scale = 5) |>
-  plot(interpolate = FALSE)
+```{r vector-raster, fig.height = 2}
+vector_text_raster("Hello\n#RStats!", scale_coords = 5) |>
+  plot()
 ```
 
 
@@ -196,10 +185,10 @@ vector_text_raster("Hello\n#RStats!", scale = 5) |>
 
 This is an example of bespoke rendering of the strokes for an example string.
 
-For each character (`char_idx`) there are 1-or-more strokes (`stroke`).  Each stroke
+For each character (`char_idx`) there are 1-or-more strokes (`stroke_idx`).  Each stroke
 has has 2 or more rows giving the path for this particular stroke.
 
-When plotting with ggplot, draw path for the points-within-strokes-within-characters.
+When plotting with ggplot, draw paths for stroke-within-character.
 
 
 ```{r vector-bespoke, fig.height = 3}
@@ -226,7 +215,7 @@ ggplot(coords) +
 
 The font with the best unicode coverage is the bitmap font `unifont`
 
-```{r unicode, fig.height = 3}
+```{r unicode, fig.height = 2}
 library(lofifonts)
 
 txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution」である。"
@@ -235,7 +224,7 @@ txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution
 # Render quickly with built-in conversion
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bitmap_text_raster(txt, "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 
@@ -261,7 +250,7 @@ which supports reading and manipulating many different types of bitmap font.
 To use a font loaded with `bittermelon` is must first be convert to the 
 `lofi` format which this package understands.
 
-```{r}
+```{r, fig.height = 0.5}
 # Load font using "bittermelon"
 filename <- system.file("fonts/fixed/4x6.yaff.gz", package = "bittermelon", mustWork = TRUE)
 bmfont <- bittermelon::read_yaff(filename)
@@ -272,7 +261,7 @@ lofi
 
 # Layout the text and render to a raster
 bitmap_text_raster('hello', font = lofi) |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 
@@ -280,35 +269,29 @@ bitmap_text_raster('hello', font = lofi) |>
 
 ## Large block of text in bitmap font
 
-```{r}
+```{r fig.height = 3, dpi=300}
 library(lorem)
-set.seed(1)
-oldpar <- par(mai = c(0, 0, 0, 0))
 
-lorem::ipsum(2) |>
+set.seed(1)
+lorem::ipsum(1) |>
   strwrap(40) |>
   paste(collapse = "\n") |>
   bitmap_text_raster() |>
   plot()
-
-par(oldpar)
 ```
 
 
 ## Large block of text in vector font
 
-```{r fig.width = 21, fig.height = 6}
+```{r fig.height = 2, dpi=300}
 library(lorem)
 set.seed(1)
-oldpar <- par(mai = c(0, 0, 0, 0))
 
 lorem::ipsum(1) |>
-  strwrap(60) |>
+  strwrap(50) |>
   paste(collapse = "\n") |>
   vector_text_raster() |>
-  plot(interpolate = FALSE)
-
-par(oldpar)
+  plot(interpolate = TRUE)
 ```
 
 
@@ -381,15 +364,15 @@ txt <- paste(txt, collapse = "\n") -> txt
 # txt <- 'hello\nworld\nthere\ngoes\nthe'
 vector_text_coords(txt) |> bench::mark()
 
-vector_text_matrix(txt, scale = 1) 
-vector_text_raster(txt, scale = 3) |> plot(interpolate = FALSE)
+vector_text_matrix(txt, scale_coords = 1) 
+vector_text_raster(txt, scale_coords = 3) |> plot()
 
 
 set.seed(1); 
 lorem::ipsum(2) |> 
   strwrap(40) |> 
   paste(collapse = "\n") |>
-  vector_text_raster(scale = 3) |> 
+  vector_text_raster(scale_coords = 3) |> 
   plot()
 ```
 

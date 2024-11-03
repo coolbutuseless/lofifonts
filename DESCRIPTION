@@ -1,7 +1,7 @@
 Package: lofifonts
 Type: Package
 Title: Text Rendering with Bitmap and Vector Fonts
-Version: 0.1.0.9003
+Version: 0.1.1
 Authors@R: c(
     person("Mike", "Cheng", role = c("aut", "cre", 'cph'), email = "mikefc@coolbutuseless.com"),
     person("June", "Choe", role = "ctb", email = "jchoe001@gmail.com", comment = "Contributed character positioning code"),
@@ -11,12 +11,14 @@ Authors@R: c(
     person("Scott", "Fial", role = c("cph", "tyd"), comment = "Creator of 'Tamsyn' font upon which 'Tamzen' is based"),
     person("Anders", "Hoff", role = c("cph", "tyd"), comment = "Creator of 'gridfont' font"))
 Maintainer: Mike Cheng <mikefc@coolbutuseless.com>
-Description: Alternate font rendering is useful when rendering to novel
+Description: Alternate font rendering is useful when rendering text to novel
    graphics outputs where modern font rendering is not available or 
-   not appropriate.  Bitmap and vector fonts allow for bespoke rendering using
-   pixel coordinates and line drawing.  A selection of fonts is included and
-   all can be rendered to a matrix of pixel locations or returned as
-   pixel coordinates and collections of stroke endpoints. 
+   where bespoke text positioning is required. Bitmap and vector fonts allow for 
+   custom layout and rendering using pixel coordinates and line drawing.  
+   Formatted text is created as a data.frame of pixel coordinates (for bitmap fonts)
+   or stroke coordinates (for vector fonts).  All text can be easily 
+   previewed as a matrix or raster image.  
+   A selection of fonts is included with this package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.2

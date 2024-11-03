@@ -1,7 +1,4 @@
 
-
-
-
 assert_lofi <- function(lofi) {
   stopifnot(exprs = {
     inherits(lofi, 'lofi')
@@ -46,9 +43,12 @@ assert_lofi_bitmap <- function(lofi) {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Lagged cumulative sum which resets at the given cut points
-#' @param x Vector of values. Usually sorted.
+#' 
+#' Author: June Choe
+#' 
+#' @param x Vector of values. 
 #' @param cut Vector of cut points. Usually integer. Must be sorted.
-#' @return vector of lagged cumulative sum with sum resetting to zero at
+#' @return Vector of lagged cumulative sum with sum resetting to zero at
 #'         the cut points
 #' @noRd
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,6 +64,9 @@ cumsum_cut <- function(x, cut) {
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Naive R version: Lagged cumulative sum which resets at the given cut points
+#' 
+#' Author: Mike Cheng
+#' 
 #' @param x Vector of values. Usually sorted.
 #' @param cut Vector of cut points. Usually integer. Must be sorted.
 #' @return vector of lagged cumulative sum with sum resetting to zero at
@@ -88,6 +91,9 @@ cumsum_cut_naive <- function(x, cut) {
 
 
 if (FALSE) {
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # C version. Mike Cheng
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   code <- r"(
 SEXP cumsum_cut_c(SEXP x_, SEXP cut_) {
   int nx = length(x_);
@@ -123,16 +129,5 @@ SEXP cumsum_cut_c(SEXP x_, SEXP cut_) {
 }
 )"
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

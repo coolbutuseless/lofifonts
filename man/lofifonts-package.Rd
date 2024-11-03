@@ -6,7 +6,7 @@
 \alias{lofifonts-package}
 \title{lofifonts: Text Rendering with Bitmap and Vector Fonts}
 \description{
-Alternate font rendering is useful when rendering to novel graphics outputs where modern font rendering is not available or not appropriate. Bitmap and vector fonts allow for bespoke rendering using pixel coordinates and line drawing. A selection of fonts is included and all can be rendered to a matrix of pixel locations or returned as pixel coordinates and collections of stroke endpoints.
+Alternate font rendering is useful when rendering text to novel graphics outputs where modern font rendering is not available or where bespoke text positioning is required. Bitmap and vector fonts allow for custom layout and rendering using pixel coordinates and line drawing. Formatted text is created as a data.frame of pixel coordinates (for bitmap fonts) or stroke coordinates (for vector fonts). All text can be easily previewed as a matrix or raster image. A selection of fonts is included with this package.
 }
 \seealso{
 Useful links:
@@ -21,7 +21,7 @@ Useful links:
 
 Other contributors:
 \itemize{
-  \item June Choe \email{junechoe@june.choe.com} (Contributed code for character positioning) [contributor]
+  \item June Choe \email{jchoe001@gmail.com} (Contributed character positioning code) [contributor]
   \item Frederic Cambus \email{fred@statdns.com} (Creator of 'spleen' font) [copyright holder, type designer]
   \item GNU Unifont authors (Creators of 'unifont') [copyright holder, type designer]
   \item Suraj Kurapati (Creator of 'Tamzen' font) [copyright holder, type designer]

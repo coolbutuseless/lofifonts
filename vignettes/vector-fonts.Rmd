@@ -58,14 +58,10 @@ vector_text_coords("Hello", font = 'gridfont_smooth') |>
 ```
 
 
-```{r vector-matrix, fig.height = 3}
-vector_text_matrix("Hello", "gridfont_smooth", scale = 1) 
-```
-
 
 ```{r vector-raster, fig.height = 3}
 vector_text_raster("Hello", "gridfont_smooth") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 ## Vector font: Bespoke pixel rendering
@@ -91,6 +87,7 @@ ggplot(coords) +
             linewidth = 4) +
   geom_point(aes(x, y), color = 'yellow') + 
   theme_bw() + 
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') + 
+  coord_equal()
 ```
 

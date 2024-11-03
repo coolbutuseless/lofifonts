@@ -7,7 +7,8 @@
 vector_text_matrix(
   text,
   font = c("gridfont_smooth", "gridfont", "arcade"),
-  scale = 1,
+  scale_coords = 1,
+  scale_matrix = 1,
   dx = NULL,
   dy = NULL,
   missing = utf8ToInt("?")
@@ -21,8 +22,12 @@ over multiple lines.}
 Use \code{get_lofi_names('vector')} to retrieve a list of all valid
 vector fonts included in this package.}
 
-\item{scale}{Scale factor for text rendering. Numeric value greater than zero.
+\item{scale_coords}{Scale factor for text rendering. Numeric value greater than zero.
 Default: 1}
+
+\item{scale_matrix}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+Scale up the matrix or raster result by this factor after rendering 
+the coordinates.}
 
 \item{dx}{Additional character spacing in the horizontal direction. Default: 0}
 

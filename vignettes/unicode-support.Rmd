@@ -31,14 +31,15 @@ over 50 thousand glyphs.
 
 ## Font overview
 
-| Type   | Name           | Unicode?              | # glyphs |
-|--------|----------------|-----------------------|----------|
-| Bitmap | Spleen         | Some                  | 450-1000 |
-| Bitmap | Unifont        | Lots!                 | 57086    |
-| Bitmap | Unscii         | Some                  | 3240     |
-| Vector | gridfont       | Lower case ASCII only | 68       |
-| Vector | gridfont_smooth| Lower case ASCII only | 68       |
-| Vector | arcade         | Upper case ASCII only | 66       |
+| Type   | Name            | Sizes                         | Unicode?              | # glyphs |
+|--------|-----------------|-------------------------------|-----------------------|----------|
+| Bitmap | Spleen          | 5x8, 6x12, 8x16, 12x24, 16x32 | Some                  | 450-1000 |
+| Bitmap | Tamzen          | 5x9, 6x12, 7x13, 8x15, 8x16, 10x20 bold/regular | Some |  180    |
+| Bitmap | Unifont         | 16x16                         | Yes. Plane 0, 1       | 113446   |
+| Bitmap | Unscii          | 8x8, 8x16                     | Some                  | 3240     |
+| Vector | gridfont        |                               | Lower case ASCII only | 68       |
+| Vector | gridfont_smooth |                               | Lower case ASCII only | 68       |
+| Vector | arcade          |                               | Upper case ASCII only | 66       |
 
 
 ## Rendering with `unifont`
@@ -47,7 +48,7 @@ over 50 thousand glyphs.
 txt <- "二項分布\xF0\x9F\x8E\xB2の英語表記は\n「Binomial distribution」である。"
 
 bitmap_text_raster(txt, "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 
@@ -59,8 +60,26 @@ a default character which should be used instead.
 If a default character is not defined for a font then unknown characters
 will use `?`
 
+## Codepoints supported by each font
 
-## Lists of supported codepoints
+Here is an example of looking for the `thumbs-down` and `thumbs-up` glyphs.
+
+```{r}
+codepoints <- c(0x1f44d, 0x1f44e)
+
+unifont <- get_lofi_font('unifont')
+unifont
+# Unifont has both of these
+codepoints %in% unifont$glyph_info$codepoint
+bitmap_text_raster(intToUtf8(codepoints), 'unifont') |> plot()
+
+spleen <- get_lofi_font('spleen-5x8')
+spleen
+# This spleen font has neither
+codepoints %in% spleen$glyph_info$codepoint
+bitmap_text_raster(intToUtf8(codepoints), 'spleen-5x8') |> plot()
+```
+
 
 
 

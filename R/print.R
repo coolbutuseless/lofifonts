@@ -38,3 +38,21 @@ print.lofi <- function(x, ...) {
   invisible(x)
 }
 
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Plot a lofi raster
+#' @param x lofi raster rendering
+#' @param interpolate default: FALSE
+#' @param ... extra arguments passed to \code{plot()}
+#' @return None
+#' @importFrom graphics par
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"plot.lofi-raster" <- function(x, interpolate = FALSE, ...) {
+  oldpar <- graphics::par(mai = c(0, 0, 0, 0))
+  on.exit(graphics::par(oldpar))
+  class(x) <- setdiff(class(x), "lofi-raster")
+  plot(x, interpolate = interpolate, ...)
+  invisible(x)
+}
+

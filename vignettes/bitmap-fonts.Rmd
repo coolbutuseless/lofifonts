@@ -53,14 +53,9 @@ bitmap_text_coords("Hello", font = 'unifont') |>
 ```
 
 
-```{r bitmap-matrix, fig.height = 3}
-bitmap_text_matrix("Hello", "unifont") 
-```
-
-
 ```{r bitmap-raster, fig.height = 3}
 bitmap_text_raster("Hello", "unifont") |>
-  plot(interpolate = FALSE)
+  plot()
 ```
 
 ## Bitmap font: Bespoke pixel rendering

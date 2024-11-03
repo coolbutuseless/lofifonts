@@ -2,7 +2,7 @@
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Common function for extracting data.frames from a lofi font
+#' Internal: Common function for extracting data.frames from a lofi font
 #' This works with both bitmap and vector fonts
 #' 
 #' @param text string
@@ -136,13 +136,14 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
   res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
-  class(res) <- c('tbl_df', 'tbl', 'data.frame')
+  class(res) <- c('tbl_df', 'tbl', 'data.frame', 'lofi-bitmap-coords')
+  
   res
 }
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Convert a data.frame of (x,y) coords into a matrix
+#' Internal: Convert a data.frame of (x,y) coords into a matrix
 #'
 #' @param df data.frame with x and y coords
 #' @return matrix to hold the coords
@@ -167,7 +168,9 @@ coords_to_mat <- function(df) {
   # origin on the top-left, so invert the matrix in the 'y' direction so
   # that it comes out the right way up
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  mat[rev(seq(nrow(mat))), , drop = FALSE]
+  mat <- mat[rev(seq(nrow(mat))), , drop = FALSE]
+  
+  mat
 }
 
 
@@ -176,7 +179,7 @@ coords_to_mat <- function(df) {
 #' Create a binary matrix of the rendered text
 #'
 #' @inheritParams bitmap_text_coords
-#' @param scale Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+#' @param scale_matrix Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 #'        Scale up the matrix or raster result by this factor
 #'
 #' @return Binary matrix representation of the rendered text
@@ -185,21 +188,21 @@ coords_to_mat <- function(df) {
 #' @family bitmap text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1,
+bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_matrix = 1,
                                missing = NULL) {
   
   stopifnot(length(text) == 1)
   
-  scale <- as.integer(scale)
-  stopifnot(scale >= 1)
-  
   df <- bitmap_text_coords(text, font, dx = dx, dy = dy, missing = missing)
   mat <- coords_to_mat(df)  
   
-  if (scale > 1) {
-    mat <- kronecker(mat, matrix(1L, scale, scale))
+  if (scale_matrix > 1) {
+    scale_matrix <- as.integer(scale_matrix)
+    mat <- kronecker(mat, matrix(1L, scale_matrix, scale_matrix))
   }
   
+  
+  class(mat) <- union('lofi-matrix', class(mat))
   mat
 }
 
@@ -213,19 +216,22 @@ bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale =
 #' @return Raster image representation of the rendered text
 #' @examples
 #' ras <- bitmap_text_raster('Hi')
-#' plot(ras, interpolate = FALSE)
+#' plot(ras)
 #' @family bitmap text functions
 #' @importFrom grDevices as.raster
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1, 
+bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_matrix = 1, 
                                missing = NULL) {
   stopifnot(length(text) == 1)
   
-  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy,
+  mat <- bitmap_text_matrix(text = text, font = font, scale_matrix = scale_matrix, dx = dx, dy = dy,
                             missing = missing)
   mat <- 1L - mat
-  grDevices::as.raster(mat)
+  
+  ras <- grDevices::as.raster(mat)
+  class(ras) <- union('lofi-raster', class(ras))
+  ras
 }
 
 

@@ -9,7 +9,7 @@ bitmap_text_raster(
   font = "unifont",
   dx = 0L,
   dy = 0L,
-  scale = 1,
+  scale_matrix = 1,
   missing = NULL
 )
 }
@@ -27,7 +27,7 @@ use \code{\link{convert_bm_font_to_lofi}()}}
 \item{dy}{Additional character spacing in the vertical direction i.e. between 
 rows of text. Default: 0}
 
-\item{scale}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+\item{scale_matrix}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 Scale up the matrix or raster result by this factor}
 
 \item{missing}{Codepoint to use if glyph not found in font. 
@@ -42,7 +42,7 @@ Create a raster image of the rendered text
 }
 \examples{
 ras <- bitmap_text_raster('Hi')
-plot(ras, interpolate = FALSE)
+plot(ras)
 }
 \seealso{
 Other bitmap text functions: 

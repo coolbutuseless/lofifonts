@@ -65,7 +65,7 @@ vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
   res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'x', 'y', 'line', 'x0', 'y0')]
-  class(res) <- c('tbl_df', 'tbl', 'data.frame')
+  class(res) <- c('tbl_df', 'tbl', 'data.frame', 'lofi-vector-coords')
   res
 }
 
@@ -101,8 +101,11 @@ line <- function(mat, x1, y1,  x2,  y2) {
 #' Create a binary matrix of the rendered text
 #' 
 #' @inheritParams vector_text_coords
-#' @param scale Scale factor for text rendering. Numeric value greater than zero.
+#' @param scale_coords Scale factor for text rendering. Numeric value greater than zero.
 #'        Default: 1
+#' @param scale_matrix Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+#'        Scale up the matrix or raster result by this factor after rendering 
+#'        the coordinates.
 #' 
 #' @return Binary matrix rendering of the font
 #' @examples
@@ -111,14 +114,15 @@ line <- function(mat, x1, y1,  x2,  y2) {
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
-                               scale = 1, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
+                               scale_coords = 1, scale_matrix = 1,
+                               dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
   
-  if (is.null(dx) && scale < 2) {
+  if (is.null(dx) && scale_coords < 2) {
     dx <- 1L
   }
-  if (is.null(dy) && scale < 2) {
+  if (is.null(dy) && scale_coords < 2) {
     dy <- 1L
   }
   
@@ -128,8 +132,8 @@ vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
   
   df <- vector_text_coords(text = text, font = font, dx = dx, dy = dy, missing = missing)
   
-  df$x <- df$x * scale + 1L
-  df$y <- df$y * scale + 1L
+  df$x <- df$x * scale_coords + 1L
+  df$y <- df$y * scale_coords + 1L
   
   width  <- max(df$x)
   height <- max(df$y)
@@ -145,7 +149,13 @@ vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
     }
   }
   
+  # Scale the rendered matrix
+  if (scale_matrix > 1) {
+    scale_matrix <- as.integer(scale_matrix)
+    mat <- kronecker(mat, matrix(1L, scale_matrix, scale_matrix))
+  }
   
+  class(mat) <- union('lofi-matrix', class(mat))
   mat
 }
 
@@ -159,17 +169,24 @@ vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
 #' @return Raster image of rendered text
 #' @examples
 #' ras <- vector_text_raster("Hi")
-#' plot(ras, interpolate = FALSE)
+#' plot(ras)
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vector_text_raster <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
-                               scale = 10, dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
+                               scale_coords = 10, scale_matrix = 1,
+                               dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
   stopifnot(length(text) == 1)
   
-  mat <- vector_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy, missing = missing)
-  as.raster(1L - mat)
+  mat <- vector_text_matrix(text = text, font = font, 
+                            scale_coords = scale_coords, 
+                            scale_matrix = scale_matrix,
+                            dx = dx, dy = dy, missing = missing)
+  
+  ras <- grDevices::as.raster(1L - mat)
+  class(ras) <- union('lofi-raster', class(ras))
+  ras
 }
 
 

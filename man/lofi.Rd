@@ -22,10 +22,8 @@ Each 'lofi' font is a list object with the following members:
   within a single glyph.  This is a simple concatenation of \emph{all}
   points (or strokes) in a font.  Extracting this font data for a particular 
   codepoint requires the use of other indexing elements in the 'lofi' structure.
-  NOTE: For bitmap fonts, x, y coordinates must be integers with no values
-  below 1
-  NOTE: For bitmap fonts, (x, y) coordinates must be numeric values with 
-  no values below zero.
+  NOTE: For bitmap fonts, (x, y) coordinates must be numeric, integer or
+  raw values with no values below zero.
   }
   \item{codepoint_to_idx}{An integer vector. Use a codepoint (integer) 
   to access the row index into the 'glyph_info' data.frame which holds the
@@ -84,5 +82,5 @@ plot(coords$x, coords$y, asp = 1, ann = FALSE, axes = FALSE)
 # add extra font information and layout sequences of characters 
 # over multiple lines
 bitmap_text_coords('a', 'unifont')
-bitmap_text_raster('a', 'unifont') |> plot(interpolate = FALSE)
+bitmap_text_raster('a', 'unifont') |> plot()
 }
