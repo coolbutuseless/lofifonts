@@ -14,3 +14,7 @@
 \description{
 Print summary information about a lofi font
 }
+\examples{
+font <- get_lofi_font('unscii-8')
+print(font)
+}

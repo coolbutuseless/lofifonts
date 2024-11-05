@@ -5,6 +5,9 @@
 #' @param x lofi font object
 #' @param ... other arguments ignored
 #' 
+#' @examples
+#' font <- get_lofi_font('unscii-8')
+#' print(font)
 #' @importFrom stats median
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +48,9 @@ print.lofi <- function(x, ...) {
 #' @param interpolate default: FALSE
 #' @param ... extra arguments passed to \code{plot()}
 #' @return None
+#' @examples
+#' ras <- bitmap_text_raster("Hi")
+#' plot(ras)
 #' @importFrom graphics par
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

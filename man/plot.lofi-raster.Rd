@@ -19,3 +19,7 @@ None
 \description{
 Plot a lofi raster
 }
+\examples{
+ras <- bitmap_text_raster("Hi")
+plot(ras)
+}
