@@ -1,5 +1,6 @@
-# lofifonts 0.1.2.9000  2024-11-06
+# lofifonts 0.1.3  2024-11-07
 
+* Fixes for CRAN: return value for print
 * Adjust class name for data.frame output for better compatibility with 
   `isocubes` package.
 

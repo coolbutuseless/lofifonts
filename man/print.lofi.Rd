@@ -11,6 +11,9 @@
 
 \item{...}{other arguments ignored}
 }
+\value{
+None
+}
 \description{
 Print summary information about a lofi font
 }

@@ -5,6 +5,7 @@
 #' @param x lofi font object
 #' @param ... other arguments ignored
 #' 
+#' @return None
 #' @examples
 #' font <- get_lofi_font('unscii-8')
 #' print(font)
