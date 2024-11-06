@@ -136,7 +136,7 @@ bitmap_text_coords <- function(text, font = "unifont", dx = 0L, dy = 0L, missing
   res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'x', 'y', 'line', 'x0', 'y0')]
-  class(res) <- c('tbl_df', 'tbl', 'data.frame', 'lofi-bitmap-coords')
+  class(res) <- c('lofi-bitmap-coords', 'tbl_df', 'tbl', 'data.frame')
   
   res
 }

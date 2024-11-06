@@ -1,3 +1,8 @@
+# lofifonts 0.1.2.9000  2024-11-06
+
+* Adjust class name for data.frame output for better compatibility with 
+  `isocubes` package.
+
 # lofifonts 0.1.2  2024-11-05
 
 * Fixes for cran.  Examples for `plot` and `print`

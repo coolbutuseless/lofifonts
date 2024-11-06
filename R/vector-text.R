@@ -65,7 +65,7 @@ vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
   res <- lofi_text_coords(text, lofi = lofi, dx = dx, dy = dy, missing = missing)
   
   res <- res[, c('char_idx', 'codepoint', 'stroke_idx', 'x', 'y', 'line', 'x0', 'y0')]
-  class(res) <- c('tbl_df', 'tbl', 'data.frame', 'lofi-vector-coords')
+  class(res) <- c('lofi-vector-coords', 'tbl_df', 'tbl', 'data.frame')
   res
 }
 
