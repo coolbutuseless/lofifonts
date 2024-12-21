@@ -51,6 +51,7 @@ This package will render text with a specified bitmap or vector font to:
 | Vector | gridfont |  | Lower case ASCII only | 68 |
 | Vector | gridfont_smooth |  | Lower case ASCII only | 68 |
 | Vector | arcade |  | Upper case ASCII only | 66 |
+| Vector | asteroids |  | Upper case ASCII only | 68 |
 
 Bitmap fonts:
 
@@ -97,7 +98,7 @@ get_lofi_names('bitmap')
 get_lofi_names('vector')
 ```
 
-    #> [1] "arcade"          "gridfont"        "gridfont_smooth"
+    #> [1] "arcade"          "gridfont"        "gridfont_smooth" "asteroids"
 
 ## Bitmap font: Rendering text
 
@@ -198,7 +199,7 @@ vector_text_coords("Hello") |>
     #> 499        1       104          2 1.1666667 7.000000    0 1.1666667 7.000000
 
 ``` r
-vector_text_raster("Hello\n#RStats!", scale = 5) |>
+vector_text_raster("Hello\n#RStats!", scale_coords = 5) |>
   plot()
 ```
 
@@ -348,4 +349,4 @@ A selection of the glyphs from each of the bitmap fonts
 
 A selection of the glyphs from each of the vector fonts
 
-<img src="man/figures/README-vectorsheets-1.png" width="100%" /><img src="man/figures/README-vectorsheets-2.png" width="100%" /><img src="man/figures/README-vectorsheets-3.png" width="100%" />
+<img src="man/figures/README-vectorsheets-1.png" width="100%" /><img src="man/figures/README-vectorsheets-2.png" width="100%" /><img src="man/figures/README-vectorsheets-3.png" width="100%" /><img src="man/figures/README-vectorsheets-4.png" width="100%" />

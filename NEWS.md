@@ -1,3 +1,7 @@
+# lofifonts 0.1.3.9000 2024-12-21
+
+* Add an `asteroids` font. Similar to `arcade`
+
 # lofifonts 0.1.3  2024-11-07
 
 * Fixes for CRAN: return value for print

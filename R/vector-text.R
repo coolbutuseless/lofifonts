@@ -31,7 +31,7 @@ globalVariables(c('x', 'xoffset', 'stroke_idx'))
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
+vector_text_coords <- function(text, font = 'gridfont_smooth', 
                                dx = 0L, dy = 0L, missing = utf8ToInt('?')) {
 
   
@@ -45,9 +45,9 @@ vector_text_coords <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
     assert_lofi_vector(font)
     lofi <- font 
   } else {
-    font <- match.arg(font)
+    stopifnot(font %in% c('gridfont_smooth', 'gridfont', 'arcade', 'asteroids'))
     # arcade is only lower case. gridfont is only uppercase
-    if (font == 'arcade') {
+    if (font %in% c('arcade', 'asteroids')) {
       text <- toupper(text)
     } else {
       text <- tolower(text)
@@ -113,7 +113,7 @@ line <- function(mat, x1, y1,  x2,  y2) {
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
+vector_text_matrix <- function(text, font = 'gridfont_smooth', 
                                scale_coords = 1, scale_matrix = 1,
                                dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   
@@ -173,7 +173,7 @@ vector_text_matrix <- function(text, font = c('gridfont_smooth', 'gridfont', 'ar
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-vector_text_raster <- function(text, font = c('gridfont_smooth', 'gridfont', 'arcade'), 
+vector_text_raster <- function(text, font = 'gridfont_smooth', 
                                scale_coords = 10, scale_matrix = 1,
                                dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
   

@@ -69,6 +69,7 @@ This package will render text with a specified bitmap or vector font to:
 | Vector | gridfont        |                               | Lower case ASCII only | 68       |
 | Vector | gridfont_smooth |                               | Lower case ASCII only | 68       |
 | Vector | arcade          |                               | Upper case ASCII only | 66       |
+| Vector | asteroids       |                               | Upper case ASCII only | 68       |
 
 
 Bitmap fonts:
@@ -303,7 +304,7 @@ A selection of the glyphs from each of the bitmap fonts
 ```{r fontsheets, echo=FALSE, eval=TRUE, fig.height = 4}
 lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
-txt <- intToUtf8(seq(lo, hi))
+txt <- intToUtf8(c(seq(lo, hi), seq(48, 57)))
 
 for (font_name in get_lofi_names('bitmap')) {
   coords <- bitmap_text_coords(txt, font_name)
@@ -331,7 +332,7 @@ A selection of the glyphs from each of the vector fonts
 ```{r vectorsheets, echo=FALSE, eval=TRUE, fig.height = 4}
 lo <- utf8ToInt('a')
 hi <- utf8ToInt('z')
-txt <- intToUtf8(seq(lo, hi))
+txt <- intToUtf8(c(seq(lo, hi), seq(48, 57)))
 
 for (font_name in get_lofi_names('vector')) {
   coords <- vector_text_coords(txt, font_name)

@@ -6,7 +6,7 @@
 \usage{
 vector_text_coords(
   text,
-  font = c("gridfont_smooth", "gridfont", "arcade"),
+  font = "gridfont_smooth",
   dx = 0L,
   dy = 0L,
   missing = utf8ToInt("?")

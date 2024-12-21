@@ -6,6 +6,7 @@ source("data-raw/parse-bdfs.R")
 source("data-raw/parse-gridfont.R")
 source("data-raw/parse-unscii.R")
 source("data-raw/parse-unifont-hex.R")
+source("data-raw/parse-asteroids.R")
 
 
 
@@ -219,12 +220,14 @@ vector_font_compact <- function(font) {
 vector_fonts <- list(
   arcade          = vector_font_compact(arcade),
   gridfont        = vector_font_compact(gridfont),
-  gridfont_smooth = vector_font_compact(gridfont_smooth)
+  gridfont_smooth = vector_font_compact(gridfont_smooth),
+  asteroids       = vector_font_compact(asteroids)
 )
 
 vector_fonts$arcade$baseline_offset <- 3
 vector_fonts$gridfont$baseline_offset <- 3
 vector_fonts$gridfont_smooth$baseline_offset <- 3
+vector_fonts$asteroids$baseline_offset <- 0
 
 
 for (nm in names(vector_fonts)) {
