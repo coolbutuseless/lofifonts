@@ -73,12 +73,25 @@ Vector fonts
 
 ## Installation
 
-You can install from
+This package can be installed from CRAN
+
+``` r
+install.packages('lofifonts')
+```
+
+You can install the latest development version from
 [GitHub](https://github.com/coolbutuseless/lofifonts) with:
 
 ``` r
 # install.package('remotes')
 remotes::install_github('coolbutuseless/lofifonts')
+```
+
+Pre-built source/binary versions can also be installed from
+[R-universe](https://r-universe.dev)
+
+``` r
+install.packages('lofifonts', repos = c('https://coolbutuseless.r-universe.dev', 'https://cloud.r-project.org'))
 ```
 
 ## Included fonts
