@@ -9,8 +9,10 @@ bitmap_text_raster(
   font = "unifont",
   dx = 0L,
   dy = 0L,
-  scale_matrix = 1,
-  missing = NULL
+  scale = 1,
+  missing = NULL,
+  bg = "#FFFFFF",
+  fg = "#000000"
 )
 }
 \arguments{
@@ -27,12 +29,15 @@ use \code{\link{convert_bm_font_to_lofi}()}}
 \item{dy}{Additional character spacing in the vertical direction i.e. between 
 rows of text. Default: 0}
 
-\item{scale_matrix}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+\item{scale}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 Scale up the matrix or raster result by this factor}
 
 \item{missing}{Codepoint to use if glyph not found in font. 
 Default: NULL means to use the default specified by the font internally.
 Otherwise it will default to the codepoint for '?'}
+
+\item{fg, bg}{foreground and background colors. Default: black text on 
+a white background}
 }
 \value{
 Raster image representation of the rendered text
@@ -47,6 +52,7 @@ plot(ras)
 \seealso{
 Other bitmap text functions: 
 \code{\link{bitmap_text_coords}()},
-\code{\link{bitmap_text_matrix}()}
+\code{\link{bitmap_text_matrix}()},
+\code{\link{bitmap_text_nativeraster}()}
 }
 \concept{bitmap text functions}

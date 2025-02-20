@@ -51,6 +51,7 @@ vector_text_coords('Hi')
 \seealso{
 Other vector text functions: 
 \code{\link{vector_text_matrix}()},
+\code{\link{vector_text_nativeraster}()},
 \code{\link{vector_text_raster}()}
 }
 \concept{vector text functions}

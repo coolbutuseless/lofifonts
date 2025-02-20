@@ -165,17 +165,20 @@ vector_text_matrix <- function(text, font = 'gridfont_smooth',
 #' Create a raster image of the rendered text
 #' 
 #' @inheritParams vector_text_matrix
+#' @param fg,bg foreground and background colors. Default: black text on 
+#'        a white background
 #' 
 #' @return Raster image of rendered text
 #' @examples
-#' ras <- vector_text_raster("Hi")
+#' ras <- vector_text_raster("big hi", fg = 'red')
 #' plot(ras)
 #' @family vector text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vector_text_raster <- function(text, font = 'gridfont_smooth', 
                                scale_coords = 10, scale_matrix = 1,
-                               dx = NULL, dy = NULL, missing = utf8ToInt('?')) {
+                               dx = NULL, dy = NULL, missing = utf8ToInt('?'),
+                               bg = '#FFFFFF', fg = '#000000') {
   
   stopifnot(length(text) == 1)
   
@@ -185,8 +188,77 @@ vector_text_raster <- function(text, font = 'gridfont_smooth',
                             dx = dx, dy = dy, missing = missing)
   
   ras <- grDevices::as.raster(1L - mat)
+  
+  ii <- (ras == '#000000')
+  ras[ ii] <- fg
+  ras[!ii] <- bg
+  
   class(ras) <- union('lofi-raster', class(ras))
   ras
+}
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Convert a matrix to a native raster
+# 
+# Need to:
+#   - transpose
+#   - switch dimensions
+#   - ensure it's an integer matrix
+#   - has a class of nativeRaster
+#
+# This isn't especially fast.  Use nara::matrix_to_mr() if you want a bit more
+# speed or have a pre-allocated nativeraster to copy into.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+matrix_to_nr_slow <- function(mat) {
+  mat <- t(mat)
+  dim(mat) <- rev(dim(mat))
+  mode(mat) <- 'integer'
+  class(mat) <- 'nativeRaster'
+  
+  mat
+}
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Create a nativeraster of the rendered text
+#' 
+#' @inheritParams vector_text_coords
+#' @inheritParams bitmap_text_nativeraster
+#' @param scale_coords Scale factor for text rendering. Numeric value greater than zero.
+#'        Default: 1
+#' @param scale_matrix Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+#'        Scale up the matrix or raster result by this factor after rendering 
+#'        the coordinates.
+#' 
+#' @return Binary native raster rendering of the font
+#' @examples
+#' vector_text_nativeraster("Hi")
+#' @family vector text functions
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+vector_text_nativeraster <- function(text, font = 'gridfont_smooth', 
+                               scale_coords = 1, scale_matrix = 1,
+                               dx = NULL, dy = NULL, missing = utf8ToInt('?'), 
+                               bg = 0L, fg = -16777216L) {
+  
+  stopifnot(length(text) == 1)
+  
+  mat <- vector_text_matrix(text = text, font = font, 
+                            scale_coords = scale_coords, 
+                            scale_matrix = scale_matrix,
+                            dx = dx, dy = dy, missing = missing)
+  
+  # Replace binary 0/1 with nativeRaster integer colors
+  ii <- mat == 0
+  mat[ ii] <- as.integer(bg)
+  mat[!ii] <- as.integer(fg)
+  
+  # Convert from matrix to nativeraster
+  nr <- matrix_to_nr_slow(mat)
+  class(nr) <- union(class(nr), 'lofi-nativeraster')
+  nr
 }
 
 

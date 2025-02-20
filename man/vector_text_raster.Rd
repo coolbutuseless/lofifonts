@@ -11,7 +11,9 @@ vector_text_raster(
   scale_matrix = 1,
   dx = NULL,
   dy = NULL,
-  missing = utf8ToInt("?")
+  missing = utf8ToInt("?"),
+  bg = "#FFFFFF",
+  fg = "#000000"
 )
 }
 \arguments{
@@ -37,6 +39,9 @@ rows of text. Default: 0}
 \item{missing}{Codepoint to use if glyph not found in font. 
 Default: NULL means to use the default specified by the font internally.
 Otherwise it will default to the codepoint for '?'}
+
+\item{fg, bg}{foreground and background colors. Default: black text on 
+a white background}
 }
 \value{
 Raster image of rendered text
@@ -45,12 +50,13 @@ Raster image of rendered text
 Create a raster image of the rendered text
 }
 \examples{
-ras <- vector_text_raster("Hi")
+ras <- vector_text_raster("big hi", fg = 'red')
 plot(ras)
 }
 \seealso{
 Other vector text functions: 
 \code{\link{vector_text_coords}()},
-\code{\link{vector_text_matrix}()}
+\code{\link{vector_text_matrix}()},
+\code{\link{vector_text_nativeraster}()}
 }
 \concept{vector text functions}

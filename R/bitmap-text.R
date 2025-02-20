@@ -161,14 +161,14 @@ coords_to_mat <- function(df) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Set all the pixel locations to 1
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  mat[ (df$x - 1) * height + df$y ] <- 1L
+  mat[ (df$x - 1) * height + (height - df$y + 1) ] <- 1L
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Pixel coordinates have (x, y) on the bottom left, but matrices have
   # origin on the top-left, so invert the matrix in the 'y' direction so
   # that it comes out the right way up
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  mat <- mat[rev(seq(nrow(mat))), , drop = FALSE]
+  # mat <- mat[rev(seq(nrow(mat))), , drop = FALSE]
   
   mat
 }
@@ -179,7 +179,7 @@ coords_to_mat <- function(df) {
 #' Create a binary matrix of the rendered text
 #'
 #' @inheritParams bitmap_text_coords
-#' @param scale_matrix Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+#' @param scale Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 #'        Scale up the matrix or raster result by this factor
 #'
 #' @return Binary matrix representation of the rendered text
@@ -188,7 +188,7 @@ coords_to_mat <- function(df) {
 #' @family bitmap text functions
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_matrix = 1,
+bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1,
                                missing = NULL) {
   
   stopifnot(length(text) == 1)
@@ -196,9 +196,9 @@ bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_m
   df <- bitmap_text_coords(text, font, dx = dx, dy = dy, missing = missing)
   mat <- coords_to_mat(df)  
   
-  if (scale_matrix > 1) {
-    scale_matrix <- as.integer(scale_matrix)
-    mat <- kronecker(mat, matrix(1L, scale_matrix, scale_matrix))
+  if (scale > 1) {
+    scale <- as.integer(scale)
+    mat <- kronecker(mat, matrix(1L, scale, scale))
   }
   
   
@@ -212,6 +212,7 @@ bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_m
 #' Create a raster image of the rendered text
 #' 
 #' @inheritParams bitmap_text_matrix
+#' @inheritParams vector_text_raster
 #' 
 #' @return Raster image representation of the rendered text
 #' @examples
@@ -221,17 +222,68 @@ bitmap_text_matrix <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_m
 #' @importFrom grDevices as.raster
 #' @export
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale_matrix = 1, 
-                               missing = NULL) {
+bitmap_text_raster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1, 
+                               missing = NULL, bg = '#FFFFFF', fg = '#000000') {
   stopifnot(length(text) == 1)
   
-  mat <- bitmap_text_matrix(text = text, font = font, scale_matrix = scale_matrix, dx = dx, dy = dy,
+  mat <- bitmap_text_matrix(text = text, font = font, scale = scale, dx = dx, dy = dy,
                             missing = missing)
   mat <- 1L - mat
   
   ras <- grDevices::as.raster(mat)
+  
+  ii <- (ras == '#000000')
+  ras[ ii] <- fg
+  ras[!ii] <- bg
+  
   class(ras) <- union('lofi-raster', class(ras))
   ras
 }
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#' Create a native raster image of the rendered text
+#'
+#' @inheritParams bitmap_text_coords
+#' @param scale Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+#'        Scale up the matrix or raster result by this factor
+#' @param bg background color. Default: 0L (transparent).  See \code{colorfast::col_to_int()}
+#'        for converting R colors to native raster integer values
+#' @param fg foreground color. Default: -16777216L (black)
+#'
+#' @return Binary matrix representation of the rendered text
+#' @examples
+#' bitmap_text_nativeraster('Hi')
+#' @family bitmap text functions
+#' @export
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bitmap_text_nativeraster <- function(text, font = "unifont", dx = 0L, dy = 0L, scale = 1,
+                               missing = NULL, bg = 0L, fg = -16777216L) {
+  
+  stopifnot(length(text) == 1)
+  
+  mat <- bitmap_text_matrix(
+    text    = text, 
+    font    = font, 
+    dx      = dx, 
+    dy      = dy,
+    scale   = scale,
+    missing = missing
+  )
+  
+  # Replace binary 0/1 with nativeRaster integer colors
+  ii <- mat == 0
+  mat[ ii] <- as.integer(bg)
+  mat[!ii] <- as.integer(fg)
+  
+  # Convert from matrix to nativeraster
+  nr <- matrix_to_nr_slow(mat)
+  class(nr) <- union(class(nr), 'lofi-nativeraster')
+  nr
+}
+
+
+
 
 

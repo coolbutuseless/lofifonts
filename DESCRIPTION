@@ -1,7 +1,7 @@
 Package: lofifonts
 Type: Package
 Title: Text Rendering with Bitmap and Vector Fonts
-Version: 0.1.3.9000
+Version: 0.1.3.9001
 Authors@R: c(
     person("Mike", "Cheng", role = c("aut", "cre", 'cph'), email = "mikefc@coolbutuseless.com"),
     person("June", "Choe", role = "ctb", email = "jchoe001@gmail.com", comment = "Contributed character positioning code"),

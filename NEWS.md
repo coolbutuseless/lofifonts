@@ -1,6 +1,7 @@
-# lofifonts 0.1.3.9000 2024-12-21
+# lofifonts 0.1.3.9001 2025-02-21
 
-* Add an `asteroids` font. Similar to `arcade`
+* [9001] Native raster image output of rendered text
+* [9000] Add an `asteroids` font. Similar to `arcade`
 
 # lofifonts 0.1.3  2024-11-07
 

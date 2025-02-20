@@ -43,6 +43,7 @@ This package will render text with a specified bitmap or vector font to:
 * a data.frame of character strokes (for vector coordinates)
 * a binary matrix indicating the rendered text
 * a raster image of the rendered text
+* a native raster image of the rendered text
 
 
 
@@ -52,10 +53,12 @@ This package will render text with a specified bitmap or vector font to:
     * `bitmap_text_coords()` create a data.frame of pixel locations
     * `bitmap_text_matrix()` create a binary matrix with pixel locations set to 1
     * `bitmap_text_raster()` create a raster image of the text
+    * `bitmap_text_nativeraster()` create a native raster image of the text
 * Vector font functions
     * `vector_text_coords()` create a data.frame of strokes
     * `vector_text_matrix()` create a binary matrix with pixel locations set to 1
     * `vector_text_raster()` create a raster image of the text
+    * `vector_text_nativeraster()` create a native raster image of the text
 
 ### Fonts
 

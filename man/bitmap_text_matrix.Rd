@@ -9,7 +9,7 @@ bitmap_text_matrix(
   font = "unifont",
   dx = 0L,
   dy = 0L,
-  scale_matrix = 1,
+  scale = 1,
   missing = NULL
 )
 }
@@ -27,7 +27,7 @@ use \code{\link{convert_bm_font_to_lofi}()}}
 \item{dy}{Additional character spacing in the vertical direction i.e. between 
 rows of text. Default: 0}
 
-\item{scale_matrix}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
+\item{scale}{Integer size scale factor. Default: 1.  Must be an integer value >= 1.
 Scale up the matrix or raster result by this factor}
 
 \item{missing}{Codepoint to use if glyph not found in font. 
@@ -46,6 +46,7 @@ bitmap_text_matrix('Hi')
 \seealso{
 Other bitmap text functions: 
 \code{\link{bitmap_text_coords}()},
+\code{\link{bitmap_text_nativeraster}()},
 \code{\link{bitmap_text_raster}()}
 }
 \concept{bitmap text functions}
